@@ -242,3 +242,10 @@ class Package(RadioFrequencyContainer):
             cf.package = clone
             clone.add_flight(cf)
         return clone
+
+    def all_flights_waiting_for_start(self) -> bool:
+        """Returns True if all flights in the package are waiting for start."""
+        for flight in self.flights:
+            if not flight.state.is_waiting_for_start:
+                return False
+        return True
