@@ -5,6 +5,7 @@ from datetime import datetime
 from typing import Optional, TYPE_CHECKING
 
 from game.dcs.aircrafttype import AircraftType
+from game.dcs.groundunittype import GroundUnitType
 from game.missiongenerator.aircraft.flightdata import FlightData
 from game.runways import RunwayData
 
@@ -90,6 +91,12 @@ class LogisticsInfo:
 
 
 @dataclass
+class FrontlineUnitGroupsInfo:
+    group_name: str
+    unit_type: GroundUnitType
+
+
+@dataclass
 class MissionData:
     awacs: list[AwacsInfo] = field(default_factory=list)
     runways: list[RunwayData] = field(default_factory=list)
@@ -99,3 +106,5 @@ class MissionData:
     jtacs: list[JtacInfo] = field(default_factory=list)
     logistics: list[LogisticsInfo] = field(default_factory=list)
     cp_stack: dict[UUID, Distance] = field(default_factory=dict)
+    player_frontline_groups: list[FrontlineUnitGroupsInfo] = field(default_factory=list)
+    enemy_frontline_groups: list[FrontlineUnitGroupsInfo] = field(default_factory=list)

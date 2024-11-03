@@ -45,7 +45,7 @@ from game.unitmap import UnitMap
 from game.utils import Heading
 from .frontlineconflictdescription import FrontLineConflictDescription
 from .groundforcepainter import GroundForcePainter
-from .missiondata import JtacInfo, MissionData
+from .missiondata import JtacInfo, MissionData, FrontlineUnitGroupsInfo
 from ..ato import FlightType
 
 if TYPE_CHECKING:
@@ -197,6 +197,20 @@ class FlotGenerator:
                     freq=freq,
                 )
             )
+
+            for vehicle_group, combat_group in player_groups:
+                self.mission_data.player_frontline_groups.append(
+                    FrontlineUnitGroupsInfo(
+                        group_name=vehicle_group.name, unit_type=combat_group.unit_type
+                    )
+                )
+
+            for vehicle_group, combat_group in enemy_groups:
+                self.mission_data.enemy_frontline_groups.append(
+                    FrontlineUnitGroupsInfo(
+                        group_name=vehicle_group.name, unit_type=combat_group.unit_type
+                    )
+                )
 
     def gen_infantry_group_for_group(
         self,

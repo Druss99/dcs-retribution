@@ -25,6 +25,7 @@
 * **[UI/UX]** Allow changing conditions such as Time, Date & Weather
 * **[Modding]** Added support for Su-15 Flagon mod (v1.0)
 * **[Plugins]** Support for Carsten's Arty Spotter script
+* **[Plugins]** Support for MBot's Call Artillery script (using on-map artillery)
 * **[Modding]** Added support for SK-60 mod (v1.2.1)
 * **[Mission Generation]** Introducing the Armed Recon flight plan, i.e. CAS against any Theater Ground Object
 * **[Doctrine]** Ability to customize the startup time allocated to the player
