@@ -75,7 +75,7 @@ class ConflictTheater:
 
         return False
 
-    def is_on_land(self, point: Point) -> bool:
+    def is_on_land(self, point: Point, ignore_exclusion: bool = False) -> bool:
         if not self.landmap:
             return True
 
@@ -86,9 +86,10 @@ class ConflictTheater:
         if not is_point_included:
             return False
 
-        for exclusion_zone in self.landmap.exclusion_zones.geoms:
-            if poly_contains(point.x, point.y, exclusion_zone):
-                return False
+        if not ignore_exclusion:
+            for exclusion_zone in self.landmap.exclusion_zones.geoms:
+                if poly_contains(point.x, point.y, exclusion_zone):
+                    return False
 
         return True
 

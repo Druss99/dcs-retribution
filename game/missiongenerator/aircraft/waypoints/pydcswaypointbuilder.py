@@ -85,9 +85,11 @@ class PydcsWaypointBuilder:
         return waypoint
 
     def switch_to_baro_if_in_sea(self, waypoint: MovingPoint) -> None:
-        if (
-            waypoint.alt_type == "RADIO"
-            and self.flight.coalition.game.theater.is_in_sea(waypoint.position)
+        if waypoint.alt_type == "RADIO" and (
+            self.flight.coalition.game.theater.is_in_sea(waypoint.position)
+            or not self.flight.coalition.game.theater.is_on_land(
+                waypoint.position, ignore_exclusion=True
+            )
         ):
             waypoint.alt_type = "BARO"
 
