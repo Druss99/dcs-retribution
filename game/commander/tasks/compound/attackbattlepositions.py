@@ -13,4 +13,5 @@ class AttackBattlePositions(CompoundTask[TheaterState]):
                 yield [PlanBai(battle_position)]
         # Only plan against the 2 most important CPs
         for cp in state.control_point_priority_queue[:2]:
-            yield [PlanArmedRecon(cp)]
+            if not cp.is_fleet:
+                yield [PlanArmedRecon(cp)]
