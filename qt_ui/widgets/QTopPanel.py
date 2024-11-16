@@ -178,7 +178,6 @@ class QTopPanel(QFrame):
             for flight in package.flights:
                 if isinstance(flight.state, Uninitialized):
                     flight.state.reinitialize(now)
-                flight.state.reinitialize(now)
                 if flight.state.is_waiting_for_start:
                     startup = flight.flight_plan.startup_time()
                     if startup < now:
