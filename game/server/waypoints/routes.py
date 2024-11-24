@@ -102,8 +102,18 @@ def update_package_waypoints_if_primary_flight(
             wpts.initial = wpts.get_initial_point(
                 waypoint.position, flight.package.target.position
             )
+        else:
+            return
         for f in flight.package.flights:
             if f is flight:
                 continue
-            f.recreate_flight_plan()
-            events.update_flight(f)
+            for wpt in f.flight_plan.iter_waypoints():
+                if wpt.waypoint_type == waypoint.waypoint_type or (
+                    "INGRESS" in wpt.waypoint_type.name
+                    and "INGRESS" in waypoint.waypoint_type.name
+                ):
+                    wpt.position = waypoint.position.new_in_same_map(
+                        waypoint.position.x, waypoint.position.y
+                    )
+                    events.update_flight(f)
+                    break
