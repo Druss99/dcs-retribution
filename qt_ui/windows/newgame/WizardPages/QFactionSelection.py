@@ -27,14 +27,14 @@ from qt_ui.windows.newgame.jinja_env import jinja_env
 
 
 class QFactionUnits(QScrollArea):
-    def __init__(self, faction: Faction, parent=None):
+    def __init__(self, faction: Faction, parent=None, show_jtac: bool = False):
         super().__init__()
         self.setWidgetResizable(True)
         self.content = QWidget()
         self.setWidget(self.content)
         self.parent = parent
         self.faction = faction
-        self._create_checkboxes()
+        self._create_checkboxes(show_jtac)
 
     def _add_checkboxes(
         self,
@@ -56,7 +56,7 @@ class QFactionUnits(QScrollArea):
         counter += 1
         return counter
 
-    def _create_checkboxes(self):
+    def _create_checkboxes(self, show_jtac: bool) -> None:
         counter = 0
         self.checkboxes: dict[str, QCheckBox] = {}
         grid = QGridLayout()
@@ -125,7 +125,25 @@ class QFactionUnits(QScrollArea):
             grid.addWidget(QLabel("<strong>Missile units:</strong>"), counter, 0)
             self._add_checkboxes(self.faction.missiles, counter, grid)
 
+        if show_jtac:
+            grid.addWidget(QLabel("<strong>JTAC</strong>"), counter, 0)
+            self.create_has_jtac_checkbox(counter, grid)
+
         self.content.setLayout(grid)
+
+    def create_has_jtac_checkbox(self, counter: int, grid: QGridLayout) -> None:
+        counter += 1
+        cb = QCheckBox("Has JTAC")
+        cb.setCheckState(
+            Qt.CheckState.Checked if self.faction.has_jtac else Qt.CheckState.Unchecked
+        )
+        cb.clicked.connect(self._set_jtac)
+        self.checkboxes["Has JTAC"] = cb
+        grid.addWidget(cb, counter, 1)
+        counter += 2
+
+    def _set_jtac(self, state: bool) -> None:
+        self.faction.has_jtac = state
 
     def _aircraft_predicate(self, ac: AircraftType):
         if (
@@ -267,10 +285,10 @@ class FactionSelection(QtWidgets.QWizardPage):
 
         # Faction units
         self.blueFactionUnits = QFactionUnits(
-            self.blueFactionSelect.currentData(), self.blueGroupLayout
+            self.blueFactionSelect.currentData(), self.blueGroupLayout, show_jtac=True
         )
         self.redFactionUnits = QFactionUnits(
-            self.redFactionSelect.currentData(), self.redGroupLayout
+            self.redFactionSelect.currentData(), self.redGroupLayout, show_jtac=False
         )
 
         self.blueGroupLayout.addWidget(blueFaction, 0, 0)

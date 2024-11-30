@@ -274,6 +274,7 @@ class AirWingTabs(QTabWidget):
             QFactionUnits(
                 game_model.game.coalition_for(True).faction,
                 self,
+                show_jtac=True,
             ),
             "Faction OWNFOR",
         )
@@ -281,6 +282,7 @@ class AirWingTabs(QTabWidget):
             QFactionUnits(
                 game_model.game.coalition_for(False).faction,
                 self,
+                show_jtac=False,
             ),
             "Faction OPFOR",
         )
