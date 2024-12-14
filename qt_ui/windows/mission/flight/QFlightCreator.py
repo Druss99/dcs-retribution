@@ -88,11 +88,14 @@ class QFlightCreator(QDialog):
         self.update_max_size(self.squadron_selector.aircraft_available)
         layout.addLayout(QLabeledWidget("Size:", self.flight_size_spinner))
 
-        layout.addWidget(QLabel("Loadout:"))
+        hbox = QHBoxLayout()
         self.loadout_selector = QComboBox()
+        self.loadout_selector.setMaximumWidth(250)
         self.loadout_selector.setItemDelegate(LoadoutDelegate(self.loadout_selector))
         self._init_loadout_selector()
-        layout.addWidget(self.loadout_selector)
+        hbox.addWidget(QLabel("Loadout:"))
+        hbox.addWidget(self.loadout_selector)
+        layout.addLayout(hbox)
 
         required_start_type = None
         squadron = self.squadron_selector.currentData()
@@ -310,7 +313,10 @@ class QFlightCreator(QDialog):
 
     def _init_loadout_selector(self):
         self.loadout_selector.clear()
-        for loadout in Loadout.iter_for_aircraft(self.aircraft_selector.currentData()):
+        ac_type = self.aircraft_selector.currentData()
+        if ac_type is None:
+            return
+        for loadout in Loadout.iter_for_aircraft(ac_type):
             self.loadout_selector.addItem(loadout.name, loadout)
         for loadout in Loadout.default_loadout_names_for(
             self.task_selector.currentData()
