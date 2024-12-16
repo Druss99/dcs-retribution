@@ -53,6 +53,10 @@ class ForcedOptionsGenerator:
             self.game.settings.battle_damage_assessment
         )
 
+    def _set_supercarrier_deck_crew(self) -> None:
+        value = self.game.settings.supercarrier_deck_crew
+        self.mission.forced_options.supercarrier_deck_crew = value
+
     def generate(self) -> None:
         self._set_options_view()
         self._set_external_views()
@@ -60,3 +64,4 @@ class ForcedOptionsGenerator:
         self._set_labels()
         self._set_unrestricted_satnav()
         self._set_battle_damage_assessment()
+        self._set_supercarrier_deck_crew()

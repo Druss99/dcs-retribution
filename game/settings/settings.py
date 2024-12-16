@@ -738,6 +738,12 @@ class Settings:
         GAMEPLAY_SECTION,
         default=False,
     )
+    supercarrier_deck_crew: bool = boolean_option(
+        "Use supercarrier deck-crew",
+        MISSION_GENERATOR_PAGE,
+        GAMEPLAY_SECTION,
+        default=True,
+    )
     generate_marks: bool = boolean_option(
         "Put objective markers on the map",
         MISSION_GENERATOR_PAGE,

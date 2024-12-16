@@ -37,6 +37,7 @@
 * **[UI]** Display TOT for all waypoints in the flight plan
 * **[UI]** Edit basic datalink properties for applicable aircraft
 * **[Mission Generation]** Automatic datalink network setup for applicable aircraft (_should_ in theory avoid the need to re-save the mission)
+* **[Options]** New option to force-enable deck-crew for super-carriers on dedicated server.
 
 ## Fixes
 * **[UI/UX]** A-10A flights can be edited again
