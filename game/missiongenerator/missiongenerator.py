@@ -40,6 +40,7 @@ from .tgogenerator import TgoGenerator
 from .triggergenerator import TriggerGenerator
 from .visualsgenerator import VisualsGenerator
 from ..radio.TacanContainer import TacanContainer
+from ..radio.datalink import DataLinkRegistry
 
 if TYPE_CHECKING:
     from game import Game
@@ -56,6 +57,7 @@ class MissionGenerator:
 
         self.radio_registry = RadioRegistry()
         self.tacan_registry = TacanRegistry()
+        self.datalink_registry = DataLinkRegistry()
 
         self.generation_started = False
 
@@ -247,6 +249,7 @@ class MissionGenerator:
             self.time,
             self.radio_registry,
             self.tacan_registry,
+            self.datalink_registry,
             self.unit_map,
             mission_data=self.mission_data,
             helipads=tgo_generator.helipads,

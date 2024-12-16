@@ -35,6 +35,8 @@
 * **[UI/UX]** Sync package waypoints when primary flight's waypoints are updated and recreate other flights within the package to ensure JOIN, INGRESS & SPLIT are synced
 * **[UI/UX]** Allow changing loadout on flight creation
 * **[UI]** Display TOT for all waypoints in the flight plan
+* **[UI]** Edit basic datalink properties for applicable aircraft
+* **[Mission Generation]** Automatic datalink network setup for applicable aircraft (_should_ in theory avoid the need to re-save the mission)
 
 ## Fixes
 * **[UI/UX]** A-10A flights can be edited again

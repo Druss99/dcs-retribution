@@ -37,6 +37,14 @@ from ...ato.flightmember import FlightMember
 from ...ato.flightplans.aewc import AewcFlightPlan
 from ...ato.flightplans.packagerefueling import PackageRefuelingFlightPlan
 from ...ato.flightplans.theaterrefueling import TheaterRefuelingFlightPlan
+from ...radio.datalink import (
+    DataLinkRegistry,
+    DataLinkKey,
+    DataLinkIdentifier,
+    VOICE_CALLSIGN_LABEL,
+    VOICE_CALLSIGN_NUMBER,
+    OWNSHIP_CALLSIGN,
+)
 from ...theater import Fob
 
 if TYPE_CHECKING:
@@ -53,6 +61,7 @@ class FlightGroupConfigurator:
         time: datetime,
         radio_registry: RadioRegistry,
         tacan_registry: TacanRegistry,
+        datalink_registry: DataLinkRegistry,
         mission_data: MissionData,
         dynamic_runways: dict[str, RunwayData],
         use_client: bool,
@@ -64,6 +73,7 @@ class FlightGroupConfigurator:
         self.time = time
         self.radio_registry = radio_registry
         self.tacan_registry = tacan_registry
+        self.datalink_registry = datalink_registry
         self.mission_data = mission_data
         self.dynamic_runways = dynamic_runways
         self.use_client = use_client
@@ -209,6 +219,7 @@ class FlightGroupConfigurator:
                     start_time=self.flight.flight_plan.patrol_start_time,
                     end_time=self.flight.flight_plan.patrol_end_time,
                     blue=self.flight.departure.captured,
+                    unit=self.group.units[0],
                 )
             )
         elif isinstance(
@@ -276,13 +287,49 @@ class FlightGroupConfigurator:
         return levels[new_level]
 
     def setup_props(self) -> None:
+        unit: FlyingUnit
+        member: FlightMember
         for unit, member in zip(self.group.units, self.flight.iter_members()):
             props = dict(member.properties)
             if (code := member.weapon_laser_code) is not None:
                 for laser_code_config in self.flight.unit_type.laser_code_configs:
                     props.update(laser_code_config.property_dict_for_code(code.code))
+            if unit.unit_type.datalink_networkable() and self.no_datalink_set(props):
+                self.set_datalink(props, unit.callsign_as_str())
             for prop_id, value in props.items():
                 unit.set_property(prop_id, value)
+
+    @staticmethod
+    def no_datalink_set(props: dict[str, bool | float | int | str]) -> bool:
+        for type in DataLinkKey:
+            if type.value in props:
+                return False
+        return True
+
+    def set_datalink(
+        self, props: dict[str, bool | float | int | str], callsign: str
+    ) -> None:
+        vcl = callsign[:-2][0] + callsign[:-2][-1]
+        vcn = callsign[-2:]
+        identifier = self.datalink_registry.alloc_for_aircraft(self.flight.unit_type)
+        self.set_datalink_props(props, vcl.upper(), vcn, identifier)
+
+    @staticmethod
+    def set_datalink_props(
+        props: dict[str, bool | float | int | str],
+        label: str,
+        number: str,
+        identifier: DataLinkIdentifier,
+    ) -> None:
+        if identifier.type in [DataLinkKey.LINK16, DataLinkKey.SADL]:
+            if not props.get(VOICE_CALLSIGN_LABEL):
+                props[VOICE_CALLSIGN_LABEL] = label
+            if not props.get(VOICE_CALLSIGN_NUMBER):
+                props[VOICE_CALLSIGN_NUMBER] = number
+        elif identifier.type in [DataLinkKey.IDM]:
+            if not props.get(OWNSHIP_CALLSIGN):
+                props[OWNSHIP_CALLSIGN] = f"G-{identifier.id}"
+        props[identifier.type.value] = identifier.id
 
     def setup_payloads(self) -> None:
         for unit, member in zip(self.group.units, self.flight.iter_members()):

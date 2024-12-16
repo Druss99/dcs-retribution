@@ -12,7 +12,6 @@ from game.ato.flightmember import FlightMember
 from game.ato.flightwaypoint import FlightWaypoint
 from game.ato.flightwaypointtype import FlightWaypointType
 from game.data.weapons import Pylon
-from game.lasercodes.lasercoderegistry import LaserCodeRegistry
 from game.missiongenerator.aircraft.aircraftbehavior import AircraftBehavior
 from game.missiongenerator.aircraft.aircraftpainter import AircraftPainter
 from game.missiongenerator.aircraft.bingoestimator import BingoEstimator
@@ -25,6 +24,7 @@ from game.missiongenerator.aircraft.waypoints.pydcswaypointbuilder import (
     PydcsWaypointBuilder,
 )
 from game.missiongenerator.missiondata import MissionData
+from game.radio.datalink import DataLinkRegistry
 from game.radio.radios import RadioRegistry
 from game.radio.tacan import (
     TacanRegistry,
@@ -45,6 +45,7 @@ class PretenseFlightGroupConfigurator(FlightGroupConfigurator):
         time: datetime,
         radio_registry: RadioRegistry,
         tacan_registry: TacanRegistry,
+        datalink_registry: DataLinkRegistry,
         mission_data: MissionData,
         dynamic_runways: dict[str, RunwayData],
         use_client: bool,
@@ -57,6 +58,7 @@ class PretenseFlightGroupConfigurator(FlightGroupConfigurator):
             time,
             radio_registry,
             tacan_registry,
+            datalink_registry,
             mission_data,
             dynamic_runways,
             use_client,
@@ -69,6 +71,7 @@ class PretenseFlightGroupConfigurator(FlightGroupConfigurator):
         self.time = time
         self.radio_registry = radio_registry
         self.tacan_registry = tacan_registry
+        self.datalink_registry = datalink_registry
         self.mission_data = mission_data
         self.dynamic_runways = dynamic_runways
         self.use_client = use_client
