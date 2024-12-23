@@ -180,13 +180,16 @@ class TheaterState(WorldState["TheaterState"]):
         }
 
         vulnerable_control_points = [
-            cp for cp, bp in battle_postitions.items() if not bp.blocking_capture
+            cp
+            for cp, bp in battle_postitions.items()
+            if not bp.blocking_capture or cp.is_fleet
         ]
 
         return TheaterState(
             context=context,
             barcaps_needed={
-                cp: barcap_rounds for cp in finder.vulnerable_control_points()
+                cp: 2 * barcap_rounds if cp.is_fleet else barcap_rounds
+                for cp in finder.vulnerable_control_points()
             },
             active_front_lines=list(finder.front_lines()),
             front_line_stances={f: None for f in finder.front_lines()},

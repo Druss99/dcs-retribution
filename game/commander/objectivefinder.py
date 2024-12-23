@@ -15,6 +15,7 @@ from game.theater import (
     MissionTarget,
     OffMapSpawn,
     ParkingType,
+    NavalControlPoint,
 )
 from game.theater.theatergroundobject import (
     BuildingGroundObject,
@@ -146,6 +147,9 @@ class ObjectiveFinder:
         for cp in self.friendly_control_points():
             if isinstance(cp, OffMapSpawn):
                 # Off-map spawn locations don't need protection.
+                continue
+            if isinstance(cp, NavalControlPoint):
+                yield cp  # always consider CVN/LHA as vulnerable
                 continue
             airfields_in_proximity = self.closest_airfields_to(cp)
             airbase_threat_range = self.game.settings.airbase_threat_range
