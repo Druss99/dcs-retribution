@@ -93,4 +93,4 @@ class StandardFlightPlan(FlightPlan[LayoutT], ABC):
         return_time = self.total_time_between_waypoints(
             self.tot_waypoint, self.layout.arrival
         )
-        return self.tot + return_time
+        return self.mission_departure_time + return_time
