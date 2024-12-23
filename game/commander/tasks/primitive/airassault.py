@@ -11,7 +11,7 @@ from game.theater import ControlPoint
 @dataclass
 class PlanAirAssault(PackagePlanningTask[ControlPoint]):
     def preconditions_met(self, state: TheaterState) -> bool:
-        if self.target not in state.vulnerable_control_points:
+        if self.target not in state.vulnerable_control_points or self.target.is_fleet:
             return False
         if not self.target_area_preconditions_met(state):
             return False
