@@ -5,6 +5,7 @@ from datetime import datetime
 from typing import Optional, TYPE_CHECKING
 
 from dcs.flyingunit import FlyingUnit
+from dcs.unitgroup import ShipGroup
 
 from game.dcs.aircrafttype import AircraftType
 from game.dcs.groundunittype import GroundUnitType
@@ -58,6 +59,7 @@ class CarrierInfo(UnitInfo):
     tacan: TacanChannel
     icls_channel: int | None
     link4_freq: RadioFrequency | None
+    ship_group: ShipGroup
 
 
 @dataclass

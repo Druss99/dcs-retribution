@@ -15,6 +15,7 @@ from dcs.unit import Skill
 from dcs.unitgroup import FlyingGroup
 
 from game.ato import Flight, FlightType
+from game.ato.flightplans.shiprecoverytanker import RecoveryTankerFlightPlan
 from game.callsigns import callsign_for_support_unit
 from game.data.weapons import Pylon, WeaponType
 from game.missiongenerator.logisticsgenerator import LogisticsGenerator
@@ -79,12 +80,14 @@ class FlightGroupConfigurator:
         self.use_client = use_client
 
     def configure(self) -> FlightData:
-        AircraftBehavior(self.flight.flight_type).apply_to(self.flight, self.group)
+        flight_channel = self.setup_radios()
+        AircraftBehavior(self.flight.flight_type, self.mission_data).apply_to(
+            self.flight, self.group
+        )
         AircraftPainter(self.flight, self.group).apply_livery()
         self.setup_props()
         self.setup_payloads()
         self.setup_fuel()
-        flight_channel = self.setup_radios()
 
         laser_codes: list[Optional[int]] = []
         for unit, member in zip(self.group.units, self.flight.iter_members()):
@@ -197,7 +200,11 @@ class FlightGroupConfigurator:
         if freq not in self.radio_registry.allocated_channels:
             self.radio_registry.reserve(freq)
 
-        if self.flight.flight_type in {FlightType.AEWC, FlightType.REFUELING}:
+        if self.flight.flight_type in {
+            FlightType.AEWC,
+            FlightType.REFUELING,
+            FlightType.RECOVERY,
+        }:
             self.register_air_support(freq)
         elif self.flight.client_count and self.flight.squadron.radio_presets:
             freq = self.flight.squadron.radio_presets["intra_flight"][0]
@@ -222,9 +229,11 @@ class FlightGroupConfigurator:
                     unit=self.group.units[0],
                 )
             )
-        elif isinstance(
-            self.flight.flight_plan, TheaterRefuelingFlightPlan
-        ) or isinstance(self.flight.flight_plan, PackageRefuelingFlightPlan):
+        elif (
+            isinstance(self.flight.flight_plan, TheaterRefuelingFlightPlan)
+            or isinstance(self.flight.flight_plan, PackageRefuelingFlightPlan)
+            or isinstance(self.flight.flight_plan, RecoveryTankerFlightPlan)
+        ):
             tacan = self.flight.tacan
             if tacan is None and self.flight.squadron.aircraft.dcs_unit_type.tacan:
                 try:
