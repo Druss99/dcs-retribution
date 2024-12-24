@@ -234,6 +234,16 @@ class Settings:
         detail="Implicitly determines the number of AWACS flights planned by taking the mission duration"
         " and dividing it by the desired on-station time.",
     )
+    desired_tanker_on_station_time: timedelta = minutes_option(
+        "Desired tanker on-station time",
+        page=CAMPAIGN_DOCTRINE_PAGE,
+        section=GENERAL_SECTION,
+        default=timedelta(minutes=60),
+        min=30,
+        max=150,
+        detail="Implicitly determines the number of Tanker flights planned by taking the mission duration"
+        " and dividing it by the desired on-station time.",
+    )
     autoplan_tankers_for_strike: bool = boolean_option(
         "Auto-planner plans refueling flights for Strike packages",
         page=CAMPAIGN_DOCTRINE_PAGE,
@@ -897,15 +907,6 @@ class Settings:
         min=30,
         max=150,
     )
-    desired_tanker_on_station_time: timedelta = minutes_option(
-        "Desired tanker on-station time",
-        page=MISSION_GENERATOR_PAGE,
-        section=GAMEPLAY_SECTION,
-        default=timedelta(minutes=60),
-        min=30,
-        max=150,
-    )
-    # Mission specific
     max_frontline_width: int = bounded_int_option(
         "Maximum frontline width (km)",
         page=MISSION_GENERATOR_PAGE,
