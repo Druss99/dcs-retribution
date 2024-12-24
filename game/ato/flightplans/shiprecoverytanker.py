@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-from datetime import timedelta
 from typing import Type
 
 from game.ato.flightplans.ibuilder import IBuilder
@@ -15,10 +14,6 @@ class RecoveryTankerFlightPlan(RefuelingFlightPlan):
     @staticmethod
     def builder_type() -> Type[Builder]:
         return Builder
-
-    @property
-    def patrol_duration(self) -> timedelta:
-        return self.flight.coalition.game.settings.desired_tanker_on_station_time
 
     @property
     def tot_waypoint(self) -> FlightWaypoint:
