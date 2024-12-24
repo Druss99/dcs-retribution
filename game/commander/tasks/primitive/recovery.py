@@ -7,6 +7,8 @@ from game.commander.tasks.packageplanningtask import PackagePlanningTask
 from game.commander.theaterstate import TheaterState
 from game.theater import ControlPoint
 
+MARGIN = 4  # assume 4 aircraft can land without refueling
+
 
 @dataclass
 class PlanRecovery(PackagePlanningTask[ControlPoint]):
@@ -19,14 +21,14 @@ class PlanRecovery(PackagePlanningTask[ControlPoint]):
         ac_per_tanker = state.context.settings.aircraft_per_recovery_tanker
         if not (
             self.target in state.recovery_targets
-            and state.recovery_targets[self.target] >= ac_per_tanker
+            and state.recovery_targets[self.target] >= ac_per_tanker + MARGIN
         ):
             return False
         return super().preconditions_met(state)
 
     def apply_effects(self, state: TheaterState) -> None:
         ac_per_tanker = state.context.settings.aircraft_per_recovery_tanker
-        state.recovery_targets[self.target] -= ac_per_tanker
+        state.recovery_targets[self.target] -= ac_per_tanker + MARGIN
 
     def propose_flights(self) -> None:
         self.propose_flight(FlightType.RECOVERY, 1)

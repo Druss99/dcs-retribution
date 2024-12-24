@@ -41,9 +41,10 @@ class MissionScheduler:
             p for p in self.coalition.ato.packages if p.primary_task not in dca_types
         ]
 
-        carrier_etas = []
         previous_aewc_end_time: dict[MissionTarget, datetime] = defaultdict(now.replace)
 
+        max_simultaneous_recovery_tankers = 2  # TODO: make configurable
+        carrier_etas: dict[MissionTarget, list[datetime]] = defaultdict(list)
         max_carrier_simultaneous_barcaps = 2  # TODO: make configurable
         carrier_barcaps: dict[MissionTarget, int] = defaultdict(int)
 
@@ -94,22 +95,29 @@ class MissionScheduler:
                 # to be present. Runway and air started aircraft will be
                 # delayed until their takeoff time by AirConflictGenerator.
                 package.time_over_target = next(start_time) + tot
-            arrivals = []
             for f in package.flights:
                 if f.departure.is_fleet and not f.is_helo:
-                    arrivals.append(f.flight_plan.landing_time - timedelta(minutes=10))
-            if arrivals:
-                carrier_etas.append(min(arrivals))
+                    carrier_etas[f.departure].append(
+                        f.flight_plan.landing_time - timedelta(minutes=10)
+                    )
 
+        # division by 2 is meant to provide some leeway to avoid filtering out too many ETAs
+        duration = self.coalition.game.settings.desired_tanker_on_station_time / 2
+
+        for cp in carrier_etas:
+            filtered: list[datetime] = []
+            for eta in sorted(carrier_etas[cp]):
+                count = len([t for t in filtered if eta < t + duration])
+                if count < max_simultaneous_recovery_tankers:
+                    filtered.append(eta)
+            carrier_etas[cp] = filtered
         for package in [
             p
             for p in self.coalition.ato.packages
             if p.primary_task is FlightType.RECOVERY
         ]:
-            if carrier_etas:
-                package.time_over_target = carrier_etas.pop(0)
-            else:
-                break
+            if carrier_etas[package.target]:
+                package.time_over_target = carrier_etas[package.target].pop(0)
 
     @staticmethod
     def _get_departure_time(package: Package) -> datetime | None:
