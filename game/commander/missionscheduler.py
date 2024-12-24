@@ -8,7 +8,7 @@ from typing import Iterator, TYPE_CHECKING
 
 from game.ato.flighttype import FlightType
 from game.ato.traveltime import TotEstimator
-from game.theater import MissionTarget
+from game.theater import MissionTarget, NavalControlPoint
 
 if TYPE_CHECKING:
     from game.coalition import Coalition
@@ -44,6 +44,9 @@ class MissionScheduler:
         carrier_etas = []
         previous_aewc_end_time: dict[MissionTarget, datetime] = defaultdict(now.replace)
 
+        max_carrier_simultaneous_barcaps = 2  # TODO: make configurable
+        carrier_barcaps: dict[MissionTarget, int] = defaultdict(int)
+
         start_time = start_time_generator(
             count=len(non_dca_packages),
             earliest=5 * 60,
@@ -67,7 +70,13 @@ class MissionScheduler:
                 departure_time = self._get_departure_time(package)
                 if departure_time is None:
                     continue
-                previous_cap_end_time[package.target] = departure_time
+                is_naval_cp = isinstance(package.target, NavalControlPoint)
+                count = carrier_barcaps[package.target]
+                if count >= max_carrier_simultaneous_barcaps and is_naval_cp:
+                    previous_cap_end_time[package.target] = departure_time
+                    carrier_barcaps[package.target] = 0
+                elif isinstance(package.target, NavalControlPoint):
+                    carrier_barcaps[package.target] += 1
             elif package.auto_asap:
                 package.set_tot_asap(now)
             elif package.primary_task is FlightType.AEWC:
