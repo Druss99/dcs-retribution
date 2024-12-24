@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from datetime import datetime
 from typing import Type
 
 from .airassault import AirAssaultLayout
@@ -19,6 +20,13 @@ class EscortFlightPlan(FormationAttackFlightPlan):
     @staticmethod
     def builder_type() -> Type[Builder]:
         return Builder
+
+    @property
+    def split_time(self) -> datetime:
+        if self.package.primary_flight and self.package.primary_flight.flight_plan:
+            return self.package.primary_flight.flight_plan.mission_departure_time
+        else:
+            return super().split_time
 
 
 class Builder(FormationAttackBuilder[EscortFlightPlan, FormationAttackLayout]):
