@@ -23,13 +23,21 @@ class NewGameSettings(QtWidgets.QWizardPage):
         settings = Settings()
         self.settings_widget = QSettingsWidget(settings)
         self.settings_widget.load_default_settings()
-        settings.__dict__.update(Settings.deserialize_state_dict(campaign.settings))
+        self._load_campaign_settings(campaign, settings)
         settings.player_income_multiplier = (
             campaign.recommended_player_income_multiplier
         )
         settings.enemy_income_multiplier = campaign.recommended_enemy_income_multiplier
         self.settings_widget.update_from_settings()
         self.setLayout(self.settings_widget.layout)
+
+    @staticmethod
+    def _load_campaign_settings(campaign, settings):
+        campaign_settings = Settings.deserialize_state_dict(campaign.settings)
+        campaign_settings["plugins"] = {
+            **settings.__dict__["plugins"], **campaign_settings["plugins"]
+        }
+        settings.__dict__.update(campaign_settings)
 
     def set_campaign_values(self, c: Campaign):
         sw = self.settings_widget
