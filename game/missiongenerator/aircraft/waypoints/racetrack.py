@@ -55,7 +55,12 @@ class RaceTrackBuilder(PydcsWaypointBuilder):
             engagement_distance = int(flight_plan.engagement_distance.meters)
             waypoint.tasks.append(
                 EngageTargets(
-                    max_distance=engagement_distance, targets=[Targets.All.Air]
+                    max_distance=engagement_distance,
+                    targets=[
+                        Targets.All.Air,
+                        Targets.All.Missile.AntishipMissiles,
+                        Targets.All.Missile.CruiseMissiles,
+                    ],
                 )
             )
 
