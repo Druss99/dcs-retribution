@@ -32,10 +32,11 @@ class NewGameSettings(QtWidgets.QWizardPage):
         self.setLayout(self.settings_widget.layout)
 
     @staticmethod
-    def _load_campaign_settings(campaign, settings):
+    def _load_campaign_settings(campaign: Campaign, settings: Settings) -> None:
         campaign_settings = Settings.deserialize_state_dict(campaign.settings)
         campaign_settings["plugins"] = {
-            **settings.__dict__["plugins"], **campaign_settings["plugins"]
+            **settings.__dict__["plugins"],
+            **campaign_settings["plugins"],
         }
         settings.__dict__.update(campaign_settings)
 
