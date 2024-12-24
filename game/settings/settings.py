@@ -214,6 +214,16 @@ class Settings:
         ),
     )
     # CAMPAIGN DOCTRINE
+    desired_barcap_mission_duration: timedelta = minutes_option(
+        "Desired BARCAP on-station time",
+        page=CAMPAIGN_DOCTRINE_PAGE,
+        section=GENERAL_SECTION,
+        default=timedelta(minutes=60),
+        min=30,
+        max=150,
+        detail="Implicitly determines the number of BARCAPs planned by taking the mission duration"
+        " and dividing it by the desired on-station time.",
+    )
     desired_awacs_mission_duration: timedelta = minutes_option(
         "Desired AWACS on-station time",
         page=CAMPAIGN_DOCTRINE_PAGE,
