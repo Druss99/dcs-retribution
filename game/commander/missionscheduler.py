@@ -12,6 +12,7 @@ from game.theater import MissionTarget
 
 if TYPE_CHECKING:
     from game.coalition import Coalition
+    from game.ato import Package
 
 
 class MissionScheduler:
@@ -41,6 +42,7 @@ class MissionScheduler:
         ]
 
         carrier_etas = []
+        previous_aewc_end_time: dict[MissionTarget, datetime] = defaultdict(now.replace)
 
         start_time = start_time_generator(
             count=len(non_dca_packages),
@@ -62,14 +64,19 @@ class MissionScheduler:
                 else:
                     package.time_over_target = previous_end_time
 
-                departure_time = package.mission_departure_time
-                # Should be impossible for CAPs
+                departure_time = self._get_departure_time(package)
                 if departure_time is None:
-                    logging.error(f"Could not determine mission end time for {package}")
                     continue
                 previous_cap_end_time[package.target] = departure_time
             elif package.auto_asap:
                 package.set_tot_asap(now)
+            elif package.primary_task is FlightType.AEWC:
+                last = previous_aewc_end_time[package.target]
+                package.time_over_target = tot if tot > last else last
+                departure_time = self._get_departure_time(package)
+                if departure_time is None:
+                    continue
+                previous_aewc_end_time[package.target] = departure_time
             else:
                 # But other packages should be spread out a bit. Note that take
                 # times are delayed, but all aircraft will become active at
@@ -94,3 +101,11 @@ class MissionScheduler:
                 package.time_over_target = carrier_etas.pop(0)
             else:
                 break
+
+    @staticmethod
+    def _get_departure_time(package: Package) -> datetime | None:
+        departure_time = package.mission_departure_time
+        # Should be impossible for CAP/AEWC
+        if departure_time is None:
+            logging.error(f"Could not determine mission end time for {package}")
+        return departure_time

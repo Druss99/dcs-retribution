@@ -185,6 +185,9 @@ class TheaterState(WorldState["TheaterState"]):
             if not bp.blocking_capture or cp.is_fleet
         ]
 
+        aewc_targets = [cp for cp in finder.friendly_control_points() if cp.is_carrier]
+        aewc_targets.append(finder.farthest_friendly_control_point())
+
         return TheaterState(
             context=context,
             barcaps_needed={
@@ -194,7 +197,7 @@ class TheaterState(WorldState["TheaterState"]):
             active_front_lines=list(finder.front_lines()),
             front_line_stances={f: None for f in finder.front_lines()},
             vulnerable_front_lines=list(finder.front_lines()),
-            aewc_targets=[finder.farthest_friendly_control_point()],
+            aewc_targets=list(aewc_targets),
             refueling_targets=[finder.closest_friendly_control_point()],
             recovery_targets={cp: 0 for cp in finder.friendly_naval_control_points()},
             enemy_air_defenses=list(finder.enemy_air_defenses()),
