@@ -83,7 +83,10 @@ class PretenseMissionGenerator(MissionGenerator):
         self.add_airfields_to_unit_map()
         self.initialize_registries()
 
-        EnvironmentGenerator(self.mission, self.game.conditions, self.time).generate()
+        auto_fog = self.game.settings.use_auto_fog
+        EnvironmentGenerator(
+            self.mission, self.game.conditions, self.time, auto_fog
+        ).generate()
 
         tgo_generator = PretenseTgoGenerator(
             self.mission,

@@ -1073,6 +1073,12 @@ class Settings:
         GAMEPLAY_SECTION,
         default=True,
     )
+    use_auto_fog: bool = boolean_option(
+        "Use DCS' automatic fog setting",
+        MISSION_GENERATOR_PAGE,
+        GAMEPLAY_SECTION,
+        default=True,
+    )
 
     # Performance
     perf_smoke_gen: bool = boolean_option(
