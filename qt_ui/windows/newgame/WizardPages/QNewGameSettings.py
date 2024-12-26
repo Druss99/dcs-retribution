@@ -34,16 +34,17 @@ class NewGameSettings(QtWidgets.QWizardPage):
     @staticmethod
     def _load_campaign_settings(campaign: Campaign, settings: Settings) -> None:
         campaign_settings = Settings.deserialize_state_dict(campaign.settings)
-        campaign_settings["plugins"] = {
-            **settings.__dict__["plugins"],
-            **campaign_settings["plugins"],
-        }
+        if campaign_settings.get("plugins", {}):
+            campaign_settings["plugins"] = {
+                **settings.__dict__["plugins"],
+                **campaign_settings["plugins"],
+            }
         settings.__dict__.update(campaign_settings)
 
     def set_campaign_values(self, c: Campaign):
         sw = self.settings_widget
         sw.load_default_settings()
-        sw.settings.__dict__.update(Settings.deserialize_state_dict(c.settings))
+        self._load_campaign_settings(c, sw.settings)
         sw.settings.player_income_multiplier = c.recommended_player_income_multiplier
         sw.settings.enemy_income_multiplier = c.recommended_enemy_income_multiplier
         sw.update_from_settings()
