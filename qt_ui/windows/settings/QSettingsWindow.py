@@ -6,7 +6,7 @@ from typing import Callable, Optional, Dict
 
 from PySide6 import QtWidgets
 from PySide6.QtCore import QItemSelectionModel, QPoint, QSize, Qt
-from PySide6.QtGui import QStandardItem, QStandardItemModel
+from PySide6.QtGui import QStandardItem, QStandardItemModel, QCloseEvent
 from PySide6.QtWidgets import (
     QAbstractItemView,
     QCheckBox,
@@ -40,6 +40,7 @@ from game.settings import (
 )
 from game.settings.ISettingsContainer import SettingsContainer
 from game.sim import GameUpdateEvents
+from pydcs_extensions import BanditClouds
 from qt_ui.widgets.QLabeledWidget import QLabeledWidget
 from qt_ui.widgets.spinsliders import FloatSpinSlider, TimeInputs
 from qt_ui.windows.GameUpdateSignal import GameUpdateSignal
@@ -353,6 +354,16 @@ class QSettingsWindow(QDialog):
         self.setWindowTitle("Settings")
         self.setWindowIcon(CONST.ICONS["Settings"])
         self.setMinimumSize(840, 480)
+
+    def closeEvent(self, event: QCloseEvent) -> None:
+        self._handle_mod_settings()
+        super().closeEvent(event)
+
+    def _handle_mod_settings(self) -> None:
+        if self.game.settings.use_bandit_clouds:
+            BanditClouds.activate()
+        else:
+            BanditClouds.deactivate()
 
 
 class QSettingsWidget(QtWidgets.QWizardPage, SettingsContainer):

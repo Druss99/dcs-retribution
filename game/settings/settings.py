@@ -462,7 +462,7 @@ class Settings:
             "range is defined in the helicopter's yaml specification."
         ),
     )
-    
+
     # Campaign management
     # General
     squadron_random_chance: int = bounded_int_option(
@@ -500,6 +500,13 @@ class Settings:
             "secondary task. Expect longer flights, but squadrons will be more often "
             "assigned to their primary task."
         ),
+    )
+    use_bandit_clouds: bool = boolean_option(
+        "Use Bandit's clouds",
+        page=CAMPAIGN_MANAGEMENT_PAGE,
+        section=GENERAL_SECTION,
+        default=False,
+        detail=("If checked, Bandit's cloud presets will become available."),
     )
 
     # Pilots and Squadrons
