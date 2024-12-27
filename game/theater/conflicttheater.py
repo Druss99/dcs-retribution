@@ -52,10 +52,6 @@ class ConflictTheater:
         self.__dict__ = state
         self.landmap = load_landmap(self.landmap_path)
 
-    def __getstate__(self) -> dict[str, Any]:
-        self.landmap = None
-        return self.__dict__
-
     @staticmethod
     def landmap_path_for_terrain_name(terrain_name: str) -> Path:
         for theater_dir in THEATER_RESOURCE_DIR.iterdir():

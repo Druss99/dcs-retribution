@@ -230,12 +230,26 @@ def save_game(game: Game) -> bool:
     with logged_duration("Saving game"):
         try:
             with open(_temporary_save_file(), "wb") as f:
+                data = _unload_static_data(game)
                 pickle.dump(game, f)
+                _restore_static_data(game, data)
             shutil.copy(_temporary_save_file(), game.savepath)
             return True
         except Exception:
             logging.exception("Could not save game")
             return False
+
+
+def _restore_static_data(game: Game, data: dict[str, Any]) -> None:
+    game.theater.landmap = data["landmap"]
+
+
+def _unload_static_data(game: Game) -> dict[str, Any]:
+    landmap = game.theater.landmap
+    game.theater.landmap = None
+    return {
+        "landmap": landmap,
+    }
 
 
 def autosave(game: Game) -> bool:
@@ -246,7 +260,9 @@ def autosave(game: Game) -> bool:
     """
     try:
         with open(_autosave_path(), "wb") as f:
+            data = _unload_static_data(game)
             pickle.dump(game, f)
+            _restore_static_data(game, data)
         return True
     except Exception:
         logging.exception("Could not save game")
