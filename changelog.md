@@ -18,7 +18,7 @@
 * **[Options]** New option in Settings: Default start type for Player flights.
 * **[AirWing]** Expose OPFOR Squadrons, giving the ability to change liveries, auto-assignable mission types & an easy way to retrieve debug information.
 * **[ATO]** Allow planning as OPFOR
-* **[Campaign Design]** Support for Kola map by Orbx
+* **[Campaign Design]** Support for latest maps (Kola, Afghanistan, Iraq)
 * **[UI]** Zoom level retained when switching campaigns
 * **[UX]** Allow changing squadrons in flight's edit dialog
 * **[Cheats]** Sink/Resurrect carriers instead of showing an error during cheat-capture (use AWCD-cheat to add squadrons upon resurrection)
