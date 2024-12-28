@@ -54,6 +54,13 @@ class ConflictTheater:
 
     @staticmethod
     def landmap_path_for_terrain_name(terrain_name: str) -> Path:
+        theather_mapping = {  # map Pydcs name to respective directory name
+            "PersianGulf": "persian gulf",
+            "TheChannel": "the channel",
+            "MarianaIslands": "marianaislands",
+        }
+        if terrain_name in theather_mapping:
+            terrain_name = theather_mapping[terrain_name]
         for theater_dir in THEATER_RESOURCE_DIR.iterdir():
             if theater_dir.name.lower() in terrain_name.lower():
                 return theater_dir / "landmap.p"
