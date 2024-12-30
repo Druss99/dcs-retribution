@@ -44,6 +44,7 @@
 * **[Package Planning]** Ability to plan recovery tanker flights
 * **[Modding]** Support for Bandit's cloud presets mod (v15)
 * **[UX]** Reduce size of save-file by loading landmap data on the fly, which also implies no new campaign needs to be started to benefit from an updated landmap
+* **[Options]** New option to make AI helos RTB when winchester on rockets and guided munitions
 
 ## Fixes
 * **[UI/UX]** A-10A flights can be edited again

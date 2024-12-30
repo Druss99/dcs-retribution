@@ -333,12 +333,12 @@ class Settings:
         detail="AI will jettison their fuel tanks as soon as they're empty.",
     )
 
-    ai_no_gun: bool = boolean_option(
-        "AI helos will not use guns",
+    ai_rtb_on_rockets_and_guided: bool = boolean_option(
+        "Enable AI RTB without emptying guns",
         page=CAMPAIGN_DOCTRINE_PAGE,
         section=GENERAL_SECTION,
         default=False,
-        detail="AI helos will spawn without ammo for their guns.",
+        detail="AI helos will rtb when winchester on rockets and guided missiles.",
     )
 
     max_plane_altitude_offset: int = bounded_int_option(
