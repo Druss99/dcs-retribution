@@ -332,6 +332,15 @@ class Settings:
         default=False,
         detail="AI will jettison their fuel tanks as soon as they're empty.",
     )
+
+    ai_no_gun: bool = boolean_option(
+        "AI helos will not use guns",
+        page=CAMPAIGN_DOCTRINE_PAGE,
+        section=GENERAL_SECTION,
+        default=False,
+        detail="AI helos will spawn without ammo for their guns.",
+    )
+
     max_plane_altitude_offset: int = bounded_int_option(
         "Maximum randomized altitude offset (x1000 ft) for airplanes.",
         page=CAMPAIGN_DOCTRINE_PAGE,

@@ -114,13 +114,15 @@ class AircraftBehavior:
         mission_uses_gun: bool = True,
         rtb_on_bingo: bool = True,
         ai_unlimited_fuel: Optional[bool] = None,
+        ai_no_gun: Optional[bool] = None,
     ) -> None:
         group.points[0].tasks.clear()
         if ai_unlimited_fuel is None:
             ai_unlimited_fuel = (
                 flight.squadron.coalition.game.settings.ai_unlimited_fuel
             )
-
+        if ai_no_gun is None:
+            ai_no_gun = flight.squadron.coalition.game.settings.ai_no_gun
         # at IP, insert waypoint to orient aircraft in correct direction
         layout = flight.flight_plan.layout
         at_ip_or_combat = flight.state.is_at_ip or flight.state.in_combat
@@ -148,7 +150,15 @@ class AircraftBehavior:
         if restrict_jettison is not None:
             group.points[0].tasks.append(OptRestrictJettison(restrict_jettison))
         if rtb_winchester is not None:
-            group.points[0].tasks.append(OptRTBOnOutOfAmmo(rtb_winchester))
+            if ai_no_gun and flight.is_helo and flight.client_count == 0:
+                group.points[0].tasks.append(
+                    OptRTBOnOutOfAmmo(OptRTBOnOutOfAmmo.Values.Rockets)
+                )
+                group.points[0].tasks.append(
+                    OptRTBOnOutOfAmmo(OptRTBOnOutOfAmmo.Values.Guided)
+                )
+            else:
+                group.points[0].tasks.append(OptRTBOnOutOfAmmo(rtb_winchester))
 
         # Confiscate the bullets of AI missions that do not rely on the gun. There is no
         # "all but gun" RTB winchester option, so air to ground missions with mixed
@@ -202,6 +212,13 @@ class AircraftBehavior:
             ammo_type = OptRTBOnOutOfAmmo.Values.Cannon
 
         self.configure_behavior(flight, group, rtb_winchester=ammo_type)
+
+    def configure_ai_no_gun(
+        self, group: FlyingGroup[Any], flight: Flight, ai_no_gun: bool = False
+    ) -> None:
+        if ai_no_gun and flight.is_helo and flight.client_count == 0:
+            for unit in group.units:
+                unit.gun = 0
 
     def configure_cas(self, group: FlyingGroup[Any], flight: Flight) -> None:
         self.configure_task(flight, group, CAS, [AFAC, AntishipStrike])
