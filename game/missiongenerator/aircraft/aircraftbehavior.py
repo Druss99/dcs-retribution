@@ -114,15 +114,17 @@ class AircraftBehavior:
         mission_uses_gun: bool = True,
         rtb_on_bingo: bool = True,
         ai_unlimited_fuel: Optional[bool] = None,
-        ai_dont_use_gun: Optional[bool] = None,
+        ai_helo_rtb_on_winchester: Optional[bool] = None,
     ) -> None:
         group.points[0].tasks.clear()
         if ai_unlimited_fuel is None:
             ai_unlimited_fuel = (
                 flight.squadron.coalition.game.settings.ai_unlimited_fuel
             )
-        if ai_dont_use_gun is None:
-            ai_dont_use_gun = flight.squadron.coalition.game.settings.ai_dont_use_gun
+        if ai_helo_rtb_on_winchester is None:
+            ai_helo_rtb_on_winchester = (
+                flight.squadron.coalition.game.settings.ai_helo_rtb_on_winchester
+            )
         # at IP, insert waypoint to orient aircraft in correct direction
         layout = flight.flight_plan.layout
         at_ip_or_combat = flight.state.is_at_ip or flight.state.in_combat
@@ -150,7 +152,7 @@ class AircraftBehavior:
         if restrict_jettison is not None:
             group.points[0].tasks.append(OptRestrictJettison(restrict_jettison))
         if rtb_winchester is not None:
-            if ai_dont_use_gun and flight.is_helo:
+            if ai_helo_rtb_on_winchester and flight.is_helo:
                 group.points[0].tasks.append(
                     OptRTBOnOutOfAmmo(OptRTBOnOutOfAmmo.Values.Rockets)
                 )
