@@ -199,8 +199,14 @@ class Migrator:
         for c in self.game.coalitions:
             if isinstance(c.faction.country, str):
                 c.faction.country = countries_by_name[c.faction.country]()
-            if isinstance(c.faction.aircraft, list):
+            if getattr(c.faction, "aircraft", None) and isinstance(
+                c.faction.aircraft, list
+            ):
                 c.faction.aircraft = set(c.faction.aircraft)
+            elif getattr(c.faction, "aircrafts", None) and isinstance(
+                c.faction.aircrafts, list
+            ):
+                c.faction.aircraft = set(c.faction.aircrafts)
             if isinstance(c.faction.awacs, list):
                 c.faction.awacs = set(c.faction.awacs)
             if isinstance(c.faction.tankers, list):

@@ -368,7 +368,8 @@ class QLiberationWindow(QMainWindow):
             try:
                 Migrator(game, is_liberation)
                 return game
-            except Exception:
+            except Exception as e:
+                logging.exception(e)
                 self.incompatible_save_popup(path)
         else:
             self.incompatible_save_popup(path)

@@ -120,6 +120,13 @@ class MigrationUnpickler(pickle.Unpickler):
             except AttributeError:
                 alternate = name.split('.')[:-1] + [name.split('.')[-1][0].lower() + name.split('.')[-1][1:]]
                 name = '.'.join(alternate)
+        try:
+            return super().find_class(module, name)
+        except AttributeError:
+            if "dcs.terrain" in module and "airports" not in module:
+                module = f"{module}.airports"
+            else:
+                raise
         return super().find_class(module, name)
 # fmt: on
 
