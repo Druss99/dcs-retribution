@@ -34,6 +34,7 @@ from .su57 import *
 from .swedishmilitaryassetspack import *
 from .coldwarassets import *
 from .uh60l import *
+from .vietnamwarvessels import *
 from .chinesemilitaryassetspack import *
 
 

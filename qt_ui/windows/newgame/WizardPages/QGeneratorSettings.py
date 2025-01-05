@@ -158,6 +158,8 @@ class GeneratorOptions(QtWidgets.QWizardPage):
         self.registerField("spanishnavypack", self.spanishnavypack)
         self.irondome = QtWidgets.QCheckBox()
         self.registerField("irondome", self.irondome)
+        self.vietnamwarvessels = QtWidgets.QCheckBox()
+        self.registerField("vietnamwarvessels", self.vietnamwarvessels)
         self.chinesemilitaryassetspack = QtWidgets.QCheckBox()
         self.registerField("chinesemilitaryassetspack", self.chinesemilitaryassetspack)
 
@@ -212,6 +214,7 @@ class GeneratorOptions(QtWidgets.QWizardPage):
             ("Su-57 Felon (build-04)", self.su57_felon),
             ("Super Étendard (v2.5.5)", self.super_etendard),
             ("UH-60L Black Hawk (v1.3.1)", self.uh_60l),
+            ("Vietnam War Vessels (v0.9.0 by TeTeT)", self.vietnamwarvessels),
         ]
 
         for i in range(len(mod_pairs)):
@@ -279,6 +282,7 @@ class GeneratorOptions(QtWidgets.QWizardPage):
         self.swedishmilitaryassetspack.setChecked(
             s.get("swedishmilitaryassetspack", False)
         )
+        self.vietnamwarvessels.setChecked(s.get("vietnamwarvessels", False))
         self.chinesemilitaryassetspack.setChecked(
             s.get("chinesemilitaryassetspack", False)
         )

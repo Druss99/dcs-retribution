@@ -41,6 +41,8 @@ from dcs.ships import (
     Type_071,
     hms_invincible,
 )
+from pydcs_extensions.vietnamwarvessels import Cva_31
+
 from dcs.terrain.terrain import Airport, ParkingSlot
 from dcs.unitgroup import ShipGroup, StaticGroup
 from dcs.unittype import ShipType
@@ -1419,6 +1421,7 @@ class NavalControlPoint(
                     L52,
                     L61,
                     CV_1143_5,
+                    Cva_31,  # Vietnam War Vessels Mod
                     CVN_71,
                     CVN_72,
                     CVN_73,

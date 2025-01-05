@@ -653,6 +653,24 @@ class Faction:
             self.remove_vehicle("TR_TT")
             self.remove_vehicle("Gozanti")
             self.remove_ship("Destroyer_carrier")
+        # vietnamwarvessels
+        if not mod_settings.vietnamwarvessels:
+            self.remove_ship("PBR_MKII")
+            self.remove_ship("USS Sumner")
+            self.remove_ship("cva-31")
+            self.remove_ship("USS Fletcher")
+            self.remove_ship("USS Laffey")
+            self.remove_ship("USS Maddox")
+            self.remove_ship("USS The Sullivans")
+            self.remove_ship("P4")
+            self.remove_aircraft("vwv_a1_skyraider")
+            self.remove_aircraft("vwv_ra-5")
+            self.remove_aircraft("vwv_crusader")
+            self.remove_aircraft("vwv_mig17f")
+            self.remove_aircraft("vwv_mig21mf")
+            self.remove_aircraft("vwv_o-1")
+            self.remove_aircraft("vwv_sh2f")
+            self.remove_aircraft("vwv_hh2d")
         # Chinese Military Assets Pack
         if not mod_settings.chinesemilitaryassetspack:
             self.remove_vehicle("CH_PCL181_155")

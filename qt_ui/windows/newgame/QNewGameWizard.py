@@ -123,6 +123,7 @@ class NewGameWizard(QtWidgets.QWizard):
             swedishmilitaryassetspack=self.field("swedishmilitaryassetspack"),
             coldwarassets=self.field("coldwarassets"),
             SWPack=self.field("SWPack"),
+            vietnamwarvessels=self.field("vietnamwarvessels"),
             chinesemilitaryassetspack=self.field("chinesemilitaryassetspack"),
         )
 
