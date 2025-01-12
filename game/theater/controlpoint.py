@@ -41,8 +41,6 @@ from dcs.ships import (
     Type_071,
     hms_invincible,
 )
-from pydcs_extensions.vietnamwarvessels import Cva_31
-
 from dcs.terrain.terrain import Airport, ParkingSlot
 from dcs.unitgroup import ShipGroup, StaticGroup
 from dcs.unittype import ShipType
@@ -63,7 +61,7 @@ from game.sidc import (
 )
 from game.theater.presetlocation import PresetLocation
 from game.utils import Distance, Heading, meters
-from pydcs_extensions import L02, L52, L61
+from pydcs_extensions import L02, L52, L61, Cva_31
 from .base import Base
 from .frontline import FrontLine
 from .interfaces.CTLD import CTLD
@@ -837,7 +835,7 @@ class ControlPoint(MissionTarget, SidcDescribable, ABC):
         destinations = [
             GroundUnitDestination(cp)
             for cp in self.connected_points
-            if cp.captured == self.captured
+            if cp.captured == self.captured and cp is not self
         ]
         if not destinations:
             self.capture_equipment(game)
