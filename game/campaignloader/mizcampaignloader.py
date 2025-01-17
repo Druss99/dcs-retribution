@@ -120,8 +120,16 @@ class MizCampaignLoader:
     def control_point_from_airport(
         self, airport: Airport, ctld_zones: List[Tuple[Point, float]]
     ) -> ControlPoint:
+        starts_neutral = False
+        if airport.dynamic_spawn:
+            starts_blue = False
+            starts_neutral = True
+        elif airport.is_blue():
+            starts_blue = True
+        else:
+            starts_blue = False
         cp = Airfield(
-            airport, self.theater, starts_blue=airport.is_blue(), ctld_zones=ctld_zones
+            airport, self.theater, starts_blue, starts_neutral, ctld_zones=ctld_zones
         )
 
         # Use the unlimited aircraft option to determine if an airfield should
@@ -276,7 +284,7 @@ class MizCampaignLoader:
     def control_points(self) -> dict[UUID, ControlPoint]:
         control_points = {}
         for airport in self.mission.terrain.airport_list():
-            if airport.is_blue() or airport.is_red():
+            if airport.is_blue() or airport.is_red() or airport.is_neutral():
                 ctld_zones = self.get_ctld_zones(airport.name)
                 control_point = self.control_point_from_airport(airport, ctld_zones)
                 control_points[control_point.id] = control_point

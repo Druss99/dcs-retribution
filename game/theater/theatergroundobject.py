@@ -98,11 +98,12 @@ class TheaterGroundObject(MissionTarget, SidcDescribable, ABC):
 
     @property
     def standard_identity(self) -> StandardIdentity:
-        return (
-            StandardIdentity.FRIEND
-            if self.control_point.captured
-            else StandardIdentity.HOSTILE_FAKER
-        )
+        if self.control_point.captured:
+            return StandardIdentity.FRIEND
+        elif self.control_point.captured is None:
+            return StandardIdentity.UNKNOWN
+        else:
+            return StandardIdentity.HOSTILE_FAKER
 
     @property
     def is_dead(self) -> bool:
@@ -155,6 +156,8 @@ class TheaterGroundObject(MissionTarget, SidcDescribable, ABC):
         return "BLUE" if self.control_point.captured else "RED"
 
     def is_friendly(self, to_player: bool) -> bool:
+        if self.control_point.captured is None:
+            return False
         return self.control_point.is_friendly(to_player)
 
     def mission_types(self, for_player: bool) -> Iterator[FlightType]:

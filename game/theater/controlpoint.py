@@ -376,6 +376,7 @@ class ControlPoint(MissionTarget, SidcDescribable, ABC):
         at: StartingPosition,
         theater: ConflictTheater,
         starts_blue: bool,
+        starts_neutral: Optional[bool] = False,
         cptype: ControlPointType = ControlPointType.AIRBASE,
     ) -> None:
         super().__init__(name, position)
@@ -384,6 +385,7 @@ class ControlPoint(MissionTarget, SidcDescribable, ABC):
         self.at = at
         self.theater = theater
         self.starts_blue = starts_blue
+        self.starts_neutral = starts_neutral
         self.connected_objectives: List[TheaterGroundObject] = []
         self.preset_locations = PresetLocations()
         self.helipads: List[PointWithHeading] = []
@@ -429,7 +431,7 @@ class ControlPoint(MissionTarget, SidcDescribable, ABC):
 
     def finish_init(self, game: Game) -> None:
         assert self._coalition is None
-        self._coalition = game.coalition_for(self.starts_blue)
+        self._coalition = game.coalition_for(self.starts_blue, self.starts_neutral)
         assert self._front_line_db is None
         self._front_line_db = game.db.front_lines
 
@@ -438,7 +440,8 @@ class ControlPoint(MissionTarget, SidcDescribable, ABC):
         # the entire game state when it comes up.
         from game.sim import GameUpdateEvents
 
-        self._create_missing_front_lines(laser_code_registry, GameUpdateEvents())
+        if self.captured is not None:
+            self._create_missing_front_lines(laser_code_registry, GameUpdateEvents())
 
     @property
     def front_line_db(self) -> Database[FrontLine]:
@@ -449,9 +452,11 @@ class ControlPoint(MissionTarget, SidcDescribable, ABC):
         self, laser_code_registry: LaserCodeRegistry, events: GameUpdateEvents
     ) -> None:
         for connection in self.convoy_routes.keys():
-            if not connection.front_line_active_with(
-                self
-            ) and not connection.is_friendly_to(self):
+            if (
+                not connection.front_line_active_with(self)
+                and not connection.is_friendly_to(self)
+                and not connection.captured is None
+            ):
                 self._create_front_line_with(laser_code_registry, connection, events)
 
     def _create_front_line_with(
@@ -485,6 +490,8 @@ class ControlPoint(MissionTarget, SidcDescribable, ABC):
 
     @property
     def has_frontline(self) -> bool:
+        if self.captured is None:
+            return False
         return bool(self.front_lines)
 
     def front_line_active_with(self, other: ControlPoint) -> bool:
@@ -494,14 +501,20 @@ class ControlPoint(MissionTarget, SidcDescribable, ABC):
         return self.front_lines[other]
 
     @property
-    def captured(self) -> bool:
-        return self.coalition.player
+    def captured(self) -> Optional[bool]:
+        if self.coalition.neutral:
+            return None
+        else:
+            return self.coalition.player
 
     @property
     def standard_identity(self) -> StandardIdentity:
-        return (
-            StandardIdentity.FRIEND if self.captured else StandardIdentity.HOSTILE_FAKER
-        )
+        if self.captured:
+            return StandardIdentity.FRIEND
+        elif self.captured is None:
+            return StandardIdentity.UNKNOWN
+        else:
+            return StandardIdentity.HOSTILE_FAKER
 
     @property
     def sidc_status(self) -> Status:
@@ -813,7 +826,8 @@ class ControlPoint(MissionTarget, SidcDescribable, ABC):
                 found.append(g)
         return found
 
-    def is_friendly(self, to_player: bool) -> bool:
+    # TODO: The below two functions need to be refactored for Neutral base support or we need a new function that is called before these two functions to determine if the base is neutral or not.
+    def is_friendly(self, to_player: bool) -> Optional[bool]:
         return self.captured == to_player
 
     def is_friendly_to(self, control_point: ControlPoint) -> bool:
@@ -1119,6 +1133,8 @@ class ControlPoint(MissionTarget, SidcDescribable, ABC):
 
     @property
     def has_active_frontline(self) -> bool:
+        if self.captured is None:
+            return False
         return any(not c.is_friendly(self.captured) for c in self.connected_points)
 
     def front_is_active(self, other: ControlPoint) -> bool:
@@ -1206,6 +1222,7 @@ class Airfield(ControlPoint, CTLD):
         airport: Airport,
         theater: ConflictTheater,
         starts_blue: bool,
+        starts_neutral: Optional[bool] = False,
         ctld_zones: Optional[List[Tuple[Point, float]]] = None,
     ) -> None:
         super().__init__(
@@ -1214,6 +1231,7 @@ class Airfield(ControlPoint, CTLD):
             airport,
             theater,
             starts_blue,
+            starts_neutral,
             cptype=ControlPointType.AIRBASE,
         )
         self.airport = airport

@@ -50,6 +50,7 @@ if TYPE_CHECKING:
     from .sim import GameUpdateEvents
     from .squadrons import AirWing
     from .threatzones import ThreatZones
+    from typing import Optional
 
 COMMISION_UNIT_VARIETY = 4
 COMMISION_LIMITS_SCALE = 1.5
@@ -140,6 +141,9 @@ class Game:
         self.sanitize_sides(player_faction, enemy_faction)
         self.blue = Coalition(self, player_faction, player_budget, player=True)
         self.red = Coalition(self, enemy_faction, enemy_budget, player=False)
+        neutral_faction = player_faction
+        neutral_faction.country = self.neutral_country
+        self.neutral = Coalition(self, neutral_faction, 0, player=False, neutral=True)
         self.blue.set_opponent(self.red)
         self.red.set_opponent(self.blue)
 
@@ -229,10 +233,13 @@ class Game:
         else:
             return USAFAggressors
 
-    def coalition_for(self, player: bool) -> Coalition:
-        if player:
+    def coalition_for(self, player: bool, neutral: Optional[bool] = False) -> Coalition:
+        if neutral:
+            return self.neutral
+        elif player:
             return self.blue
-        return self.red
+        else:
+            return self.red
 
     def adjust_budget(self, amount: float, player: bool) -> None:
         self.coalition_for(player).adjust_budget(amount)

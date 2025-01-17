@@ -219,6 +219,8 @@ class ControlPointGroundObjectGenerator:
         self.control_point.connected_objectives.append(ground_object)
 
     def generate_navy(self) -> None:
+        if self.control_point.captured is None:
+            return
         skip_player_navy = self.generator_settings.no_player_navy
         if self.control_point.captured and skip_player_navy:
             return

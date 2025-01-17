@@ -32,10 +32,16 @@ if TYPE_CHECKING:
 
 class Coalition:
     def __init__(
-        self, game: Game, faction: Faction, budget: float, player: bool
+        self,
+        game: Game,
+        faction: Faction,
+        budget: float,
+        player: bool,
+        neutral: Optional[bool] = False,
     ) -> None:
         self.game = game
         self.player = player
+        self.neutral = neutral
         self.faction = faction
         self.budget = budget
         self.ato = AirTaskingOrder()
