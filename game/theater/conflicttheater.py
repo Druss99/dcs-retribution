@@ -8,6 +8,7 @@ from uuid import UUID
 
 from dcs.mapping import Point
 from dcs.terrain.terrain import Terrain
+from dcs.triggers import TriggerZone
 from shapely import geometry, ops
 
 from .daytimemap import DaytimeMap
@@ -43,6 +44,7 @@ class ConflictTheater:
         self.seasonal_conditions = seasonal_conditions
         self.daytime_map = daytime_map
         self.controlpoints: list[ControlPoint] = []
+        self.rebel_zones: list[TriggerZone] = []
 
     def __setstate__(self, state: dict[str, Any]) -> None:
         if "landmap_path" not in state:
@@ -65,6 +67,25 @@ class ConflictTheater:
             if theater_dir.name.lower() in terrain_name.lower():
                 return theater_dir / "landmap.p"
         raise RuntimeError(f"Could not determine landmap path for {terrain_name}")
+
+    def add_rebel_zones(self, zones: List[TriggerZone]) -> None:
+        self.rebel_zones.extend(zones)
+
+    @property
+    def opfor_rebel_zones(self) -> Iterator[TriggerZone]:
+        for rz in self.rebel_zones:
+            if {1: 1, 2: 0, 3: 0} == {
+                k: v for k, v in rz.color.items() if k in [1, 2, 3]
+            }:
+                yield rz
+
+    @property
+    def ownfor_rebel_zones(self) -> Iterator[TriggerZone]:
+        for rz in self.rebel_zones:
+            if {1: 0, 2: 0, 3: 1} == {
+                k: v for k, v in rz.color.items() if k in [1, 2, 3]
+            }:
+                yield rz
 
     def add_controlpoint(self, point: ControlPoint) -> None:
         self.controlpoints.append(point)

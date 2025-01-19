@@ -36,6 +36,7 @@ from .frontlineconflictdescription import FrontLineConflictDescription
 from .kneeboard import KneeboardGenerator
 from .luagenerator import LuaGenerator
 from .missiondata import MissionData
+from .rebelliongenerator import RebellionGenerator
 from .tgogenerator import TgoGenerator
 from .triggergenerator import TriggerGenerator
 from .visualsgenerator import VisualsGenerator
@@ -111,6 +112,7 @@ class MissionGenerator:
         self.generate_ground_conflicts()
         self.generate_air_units(tgo_generator)
 
+        RebellionGenerator(self.mission, self.game).generate()
         TriggerGenerator(self.mission, self.game).generate()
         ForcedOptionsGenerator(self.mission, self.game).generate()
         VisualsGenerator(self.mission, self.game).generate()
