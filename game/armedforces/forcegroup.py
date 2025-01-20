@@ -21,6 +21,7 @@ from game.layout.layout import (
     TgoLayoutUnitGroup,
 )
 from game.point_with_heading import PointWithHeading
+from game.theater import Player
 from game.theater.theatergroundobject import (
     IadsGroundObject,
     IadsBuildingGroundObject,
@@ -265,7 +266,7 @@ class ForceGroup:
             ground_object, unit_type, unit_count, fixed_pos, fixed_hdg
         )
         # If the control point is neutral, the units are dead
-        if ground_object.control_point.captured is None:
+        if ground_object.control_point.captured is Player.NEUTRAL:
             for unit in units:
                 if not unit.is_static:
                     unit.alive = False

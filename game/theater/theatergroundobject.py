@@ -20,6 +20,7 @@ from game.sidc import (
     SymbolSet,
 )
 from game.theater.presetlocation import PresetLocation
+from .player import Player
 from .missiontarget import MissionTarget
 from ..data.groups import GroupTask
 from ..utils import Distance, Heading, meters
@@ -98,9 +99,9 @@ class TheaterGroundObject(MissionTarget, SidcDescribable, ABC):
 
     @property
     def standard_identity(self) -> StandardIdentity:
-        if self.control_point.captured:
+        if self.control_point.captured is Player.BLUE:
             return StandardIdentity.FRIEND
-        elif self.control_point.captured is None:
+        elif self.control_point.captured is Player.NEUTRAL:
             return StandardIdentity.UNKNOWN
         else:
             return StandardIdentity.HOSTILE_FAKER
@@ -155,12 +156,12 @@ class TheaterGroundObject(MissionTarget, SidcDescribable, ABC):
     def faction_color(self) -> str:
         return "BLUE" if self.control_point.captured else "RED"
 
-    def is_friendly(self, to_player: bool) -> bool:
-        if self.control_point.captured is None:
+    def is_friendly(self, to_player: Player) -> bool:
+        if self.control_point.captured is Player.NEUTRAL:
             return False
         return self.control_point.is_friendly(to_player)
 
-    def mission_types(self, for_player: bool) -> Iterator[FlightType]:
+    def mission_types(self, for_player: Player) -> Iterator[FlightType]:
         from game.ato import FlightType
 
         if self.is_friendly(for_player):
@@ -363,7 +364,7 @@ class BuildingGroundObject(TheaterGroundObject):
 
 
 class NavalGroundObject(TheaterGroundObject, ABC):
-    def mission_types(self, for_player: bool) -> Iterator[FlightType]:
+    def mission_types(self, for_player: Player) -> Iterator[FlightType]:
         from game.ato import FlightType
 
         if not self.is_friendly(for_player):
@@ -469,7 +470,7 @@ class MissileSiteGroundObject(TheaterGroundObject):
     def should_head_to_conflict(self) -> bool:
         return True
 
-    def mission_types(self, for_player: bool) -> Iterator[FlightType]:
+    def mission_types(self, for_player: Player) -> Iterator[FlightType]:
         from game.ato import FlightType
 
         if not self.is_friendly(for_player):
@@ -510,7 +511,7 @@ class CoastalSiteGroundObject(TheaterGroundObject):
     def should_head_to_conflict(self) -> bool:
         return True
 
-    def mission_types(self, for_player: bool) -> Iterator[FlightType]:
+    def mission_types(self, for_player: Player) -> Iterator[FlightType]:
         from game.ato import FlightType
 
         if not self.is_friendly(for_player):
@@ -537,7 +538,7 @@ class IadsGroundObject(TheaterGroundObject, ABC):
             task=task,
         )
 
-    def mission_types(self, for_player: bool) -> Iterator[FlightType]:
+    def mission_types(self, for_player: Player) -> Iterator[FlightType]:
         from game.ato import FlightType
 
         if not self.is_friendly(for_player):
@@ -588,7 +589,7 @@ class SamGroundObject(IadsGroundObject):
     def symbol_set_and_entity(self) -> tuple[SymbolSet, Entity]:
         return SymbolSet.LAND_UNIT, LandUnitEntity.AIR_DEFENSE
 
-    def mission_types(self, for_player: bool) -> Iterator[FlightType]:
+    def mission_types(self, for_player: Player) -> Iterator[FlightType]:
         from game.ato import FlightType
 
         if not self.is_friendly(for_player):
@@ -645,7 +646,7 @@ class VehicleGroupGroundObject(TheaterGroundObject):
     def should_head_to_conflict(self) -> bool:
         return True
 
-    def mission_types(self, for_player: bool) -> Iterator[FlightType]:
+    def mission_types(self, for_player: Player) -> Iterator[FlightType]:
         from game.ato import FlightType
 
         if not self.is_friendly(for_player):
@@ -700,7 +701,7 @@ class ShipGroundObject(NavalGroundObject):
 
 
 class IadsBuildingGroundObject(BuildingGroundObject):
-    def mission_types(self, for_player: bool) -> Iterator[FlightType]:
+    def mission_types(self, for_player: Player) -> Iterator[FlightType]:
         from game.ato import FlightType
 
         if not self.is_friendly(for_player):

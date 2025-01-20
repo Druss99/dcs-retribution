@@ -72,6 +72,7 @@ from .theatergroundobject import (
     VehicleGroupGroundObject,
 )
 from .theatergroup import TheaterUnit
+from .player import Player
 from ..ato.starttype import StartType
 from ..data.units import UnitClass
 from ..db import Database
@@ -375,8 +376,7 @@ class ControlPoint(MissionTarget, SidcDescribable, ABC):
         position: Point,
         at: StartingPosition,
         theater: ConflictTheater,
-        starts_blue: bool,
-        starts_neutral: Optional[bool] = False,
+        starting_coalition: Player,
         cptype: ControlPointType = ControlPointType.AIRBASE,
     ) -> None:
         super().__init__(name, position)
@@ -384,8 +384,7 @@ class ControlPoint(MissionTarget, SidcDescribable, ABC):
         self.full_name = name
         self.at = at
         self.theater = theater
-        self.starts_blue = starts_blue
-        self.starts_neutral = starts_neutral
+        self.starting_coalition = starting_coalition
         self.connected_objectives: List[TheaterGroundObject] = []
         self.preset_locations = PresetLocations()
         self.helipads: List[PointWithHeading] = []
@@ -431,7 +430,7 @@ class ControlPoint(MissionTarget, SidcDescribable, ABC):
 
     def finish_init(self, game: Game) -> None:
         assert self._coalition is None
-        self._coalition = game.coalition_for(self.starts_blue, self.starts_neutral)
+        self._coalition = game.coalition_for(self.starting_coalition)
         assert self._front_line_db is None
         self._front_line_db = game.db.front_lines
 
@@ -440,7 +439,7 @@ class ControlPoint(MissionTarget, SidcDescribable, ABC):
         # the entire game state when it comes up.
         from game.sim import GameUpdateEvents
 
-        if self.captured is not None:
+        if self.captured != Player.NEUTRAL:
             self._create_missing_front_lines(laser_code_registry, GameUpdateEvents())
 
     @property
@@ -455,7 +454,7 @@ class ControlPoint(MissionTarget, SidcDescribable, ABC):
             if (
                 not connection.front_line_active_with(self)
                 and not connection.is_friendly_to(self)
-                and not connection.captured is None
+                and connection.captured != Player.NEUTRAL
             ):
                 self._create_front_line_with(laser_code_registry, connection, events)
 
@@ -490,7 +489,7 @@ class ControlPoint(MissionTarget, SidcDescribable, ABC):
 
     @property
     def has_frontline(self) -> bool:
-        if self.captured is None:
+        if self.captured is Player.NEUTRAL:
             return False
         return bool(self.front_lines)
 
@@ -501,18 +500,15 @@ class ControlPoint(MissionTarget, SidcDescribable, ABC):
         return self.front_lines[other]
 
     @property
-    def captured(self) -> Optional[bool]:
-        if self.coalition.neutral:
-            return None
-        else:
-            return self.coalition.player
+    def captured(self) -> Player:
+        return self.coalition.player
 
     @property
     def standard_identity(self) -> StandardIdentity:
-        if self.captured:
-            return StandardIdentity.FRIEND
-        elif self.captured is None:
+        if self.captured is Player.NEUTRAL:
             return StandardIdentity.UNKNOWN
+        elif self.captured is Player.BLUE:
+            return StandardIdentity.FRIEND
         else:
             return StandardIdentity.HOSTILE_FAKER
 
@@ -826,8 +822,7 @@ class ControlPoint(MissionTarget, SidcDescribable, ABC):
                 found.append(g)
         return found
 
-    # TODO: The below two functions need to be refactored for Neutral base support or we need a new function that is called before these two functions to determine if the base is neutral or not.
-    def is_friendly(self, to_player: bool) -> Optional[bool]:
+    def is_friendly(self, to_player: Player) -> bool:
         return self.captured == to_player
 
     def is_friendly_to(self, control_point: ControlPoint) -> bool:
@@ -836,7 +831,9 @@ class ControlPoint(MissionTarget, SidcDescribable, ABC):
     def capture_equipment(self, game: Game) -> None:
         total = self.base.total_armor_value
         self.base.armor.clear()
-        game.adjust_budget(total, player=not self.captured)
+        game.adjust_budget(
+            total, player=Player.BLUE if self.captured is Player.RED else Player.RED
+        )
         game.message(
             f"{self.name} is not connected to any friendly points. Ground "
             f"vehicles have been captured and sold for ${total}M."
@@ -865,7 +862,9 @@ class ControlPoint(MissionTarget, SidcDescribable, ABC):
 
     def capture_aircraft(self, game: Game, airframe: AircraftType, count: int) -> None:
         value = airframe.price * count
-        game.adjust_budget(value, player=not self.captured)
+        game.adjust_budget(
+            value, player=Player.BLUE if self.captured is Player.RED else Player.RED
+        )
         game.message(
             f"No valid retreat destination in range of {self.name} for {airframe} "
             f"{count} aircraft have been captured and sold for ${value}M."
@@ -968,7 +967,7 @@ class ControlPoint(MissionTarget, SidcDescribable, ABC):
         pass
 
     # TODO: Should be Airbase specific.
-    def capture(self, game: Game, events: GameUpdateEvents, for_player: bool) -> None:
+    def capture(self, game: Game, events: GameUpdateEvents, for_player: Player) -> None:
         new_coalition = game.coalition_for(for_player)
         self.ground_unit_orders.refund_all(self.coalition)
         self.retreat_ground_units(game)
@@ -1133,7 +1132,7 @@ class ControlPoint(MissionTarget, SidcDescribable, ABC):
 
     @property
     def has_active_frontline(self) -> bool:
-        if self.captured is None:
+        if self.captured is Player.NEUTRAL:
             return False
         return any(not c.is_friendly(self.captured) for c in self.connected_points)
 
@@ -1221,8 +1220,7 @@ class Airfield(ControlPoint, CTLD):
         self,
         airport: Airport,
         theater: ConflictTheater,
-        starts_blue: bool,
-        starts_neutral: Optional[bool] = False,
+        starting_coalition: Player,
         ctld_zones: Optional[List[Tuple[Point, float]]] = None,
     ) -> None:
         super().__init__(
@@ -1230,8 +1228,7 @@ class Airfield(ControlPoint, CTLD):
             airport.position,
             airport,
             theater,
-            starts_blue,
-            starts_neutral,
+            starting_coalition,
             cptype=ControlPointType.AIRBASE,
         )
         self.airport = airport
@@ -1262,7 +1259,7 @@ class Airfield(ControlPoint, CTLD):
             return True
         return self.runway_is_operational()
 
-    def mission_types(self, for_player: bool) -> Iterator[FlightType]:
+    def mission_types(self, for_player: Player) -> Iterator[FlightType]:
         from game.ato import FlightType
 
         if not self.is_friendly(for_player):
@@ -1383,7 +1380,7 @@ class NavalControlPoint(
     def is_fleet(self) -> bool:
         return True
 
-    def mission_types(self, for_player: bool) -> Iterator[FlightType]:
+    def mission_types(self, for_player: Player) -> Iterator[FlightType]:
         from game.ato import FlightType
 
         if self.is_friendly(for_player):
@@ -1491,7 +1488,7 @@ class NavalControlPoint(
 
 class Carrier(NavalControlPoint):
     def __init__(
-        self, name: str, at: Point, theater: ConflictTheater, starts_blue: bool
+        self, name: str, at: Point, theater: ConflictTheater, starts_blue: Player
     ):
         super().__init__(
             name,
@@ -1506,7 +1503,7 @@ class Carrier(NavalControlPoint):
     def symbol_set_and_entity(self) -> tuple[SymbolSet, Entity]:
         return SymbolSet.SEA_SURFACE, SeaSurfaceEntity.CARRIER
 
-    def capture(self, game: Game, events: GameUpdateEvents, for_player: bool) -> None:
+    def capture(self, game: Game, events: GameUpdateEvents, for_player: Player) -> None:
         raise RuntimeError("Carriers cannot be captured")
 
     @property
@@ -1526,7 +1523,7 @@ class Carrier(NavalControlPoint):
 
 class Lha(NavalControlPoint):
     def __init__(
-        self, name: str, at: Point, theater: ConflictTheater, starts_blue: bool
+        self, name: str, at: Point, theater: ConflictTheater, starts_blue: Player
     ):
         super().__init__(
             name, at, at, theater, starts_blue, cptype=ControlPointType.LHA_GROUP
@@ -1536,7 +1533,7 @@ class Lha(NavalControlPoint):
     def symbol_set_and_entity(self) -> tuple[SymbolSet, Entity]:
         return SymbolSet.SEA_SURFACE, SeaSurfaceEntity.AMPHIBIOUS_ASSAULT_SHIP_GENERAL
 
-    def capture(self, game: Game, events: GameUpdateEvents, for_player: bool) -> None:
+    def capture(self, game: Game, events: GameUpdateEvents, for_player: Player) -> None:
         raise RuntimeError("LHAs cannot be captured")
 
     @property
@@ -1559,7 +1556,7 @@ class OffMapSpawn(ControlPoint):
         return True
 
     def __init__(
-        self, name: str, position: Point, theater: ConflictTheater, starts_blue: bool
+        self, name: str, position: Point, theater: ConflictTheater, starts_blue: Player
     ):
         super().__init__(
             name,
@@ -1574,10 +1571,10 @@ class OffMapSpawn(ControlPoint):
     def symbol_set_and_entity(self) -> tuple[SymbolSet, Entity]:
         return SymbolSet.LAND_INSTALLATIONS, LandInstallationEntity.AIPORT_AIR_BASE
 
-    def capture(self, game: Game, events: GameUpdateEvents, for_player: bool) -> None:
+    def capture(self, game: Game, events: GameUpdateEvents, for_player: Player) -> None:
         raise RuntimeError("Off map control points cannot be captured")
 
-    def mission_types(self, for_player: bool) -> Iterator[FlightType]:
+    def mission_types(self, for_player: Player) -> Iterator[FlightType]:
         yield from []
 
     def total_aircraft_parking(self, parking_type: ParkingType) -> int:
@@ -1634,7 +1631,7 @@ class Fob(ControlPoint, RadioFrequencyContainer, CTLD):
         name: str,
         at: Point,
         theater: ConflictTheater,
-        starts_blue: bool,
+        starts_blue: Player,
         ctld_zones: Optional[List[Tuple[Point, float]]] = None,
     ) -> None:
         super().__init__(
@@ -1667,7 +1664,7 @@ class Fob(ControlPoint, RadioFrequencyContainer, CTLD):
     def runway_status(self) -> RunwayStatus:
         return RunwayStatus()
 
-    def mission_types(self, for_player: bool) -> Iterator[FlightType]:
+    def mission_types(self, for_player: Player) -> Iterator[FlightType]:
         from game.ato import FlightType
 
         if not self.is_friendly(for_player):

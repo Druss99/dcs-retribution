@@ -15,7 +15,7 @@ from dcs.unit import Skill
 from game.ato import FlightType
 from game.dcs.aircrafttype import AircraftType
 from game.plugins import LuaPluginManager
-from game.theater import TheaterGroundObject
+from game.theater import Player, TheaterGroundObject
 from game.theater.iadsnetwork.iadsrole import IadsRole
 from game.utils import escape_string_for_lua
 from game.data.units import UnitClass
@@ -144,7 +144,7 @@ class LuaGenerator:
 
         target_points = lua_data.add_item("TargetPoints")
         for flight in self.mission_data.flights:
-            if flight.friendly and flight.flight_type in [
+            if flight.friendly is Player.BLUE and flight.flight_type in [
                 FlightType.ANTISHIP,
                 FlightType.DEAD,
                 FlightType.SEAD,
@@ -178,7 +178,7 @@ class LuaGenerator:
         for cp in self.game.theater.controlpoints:
             coalition_object = (
                 lua_data.get_or_create_item("BlueAA")
-                if cp.captured
+                if cp.captured is Player.BLUE
                 else lua_data.get_or_create_item("RedAA")
             )
             for ground_object in cp.ground_objects:

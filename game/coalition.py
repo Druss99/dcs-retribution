@@ -17,6 +17,7 @@ from game.procurement import AircraftProcurementRequest, ProcurementAi
 from game.profiling import MultiEventTracer, logged_duration
 from game.squadrons import AirWing
 from game.theater.bullseye import Bullseye
+from game.theater.player import Player
 from game.theater.transitnetwork import TransitNetwork, TransitNetworkBuilder
 from game.threatzones import ThreatZones
 from game.transfers import PendingTransfers
@@ -32,16 +33,10 @@ if TYPE_CHECKING:
 
 class Coalition:
     def __init__(
-        self,
-        game: Game,
-        faction: Faction,
-        budget: float,
-        player: bool,
-        neutral: Optional[bool] = False,
+        self, game: Game, faction: Faction, budget: float, player: Player
     ) -> None:
         self.game = game
         self.player = player
-        self.neutral = neutral
         self.faction = faction
         self.budget = budget
         self.ato = AirTaskingOrder()
@@ -74,9 +69,11 @@ class Coalition:
 
     @property
     def coalition_id(self) -> int:
-        if self.player:
+        if self.player is Player.BLUE:
             return 2
-        return 1
+        elif self.player is Player.RED:
+            return 1
+        return 0
 
     @property
     def opponent(self) -> Coalition:
@@ -209,7 +206,7 @@ class Coalition:
             squadron.refund_orders()
 
     def plan_missions(self, now: datetime) -> None:
-        color = "Blue" if self.player else "Red"
+        color = "Blue" if self.player is Player.BLUE else "Red"
         with MultiEventTracer() as tracer:
             with tracer.trace(f"{color} mission planning"):
                 with tracer.trace(f"{color} mission identification"):

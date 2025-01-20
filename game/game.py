@@ -32,7 +32,7 @@ from .infos.information import Information
 from .lasercodes.lasercoderegistry import LaserCodeRegistry
 from .profiling import logged_duration
 from .settings import Settings
-from .theater import ConflictTheater
+from .theater import ConflictTheater, Player
 from .theater.bullseye import Bullseye
 from .theater.theatergroundobject import (
     EwrGroundObject,
@@ -50,7 +50,6 @@ if TYPE_CHECKING:
     from .sim import GameUpdateEvents
     from .squadrons import AirWing
     from .threatzones import ThreatZones
-    from typing import Optional
 
 COMMISION_UNIT_VARIETY = 4
 COMMISION_LIMITS_SCALE = 1.5
@@ -139,11 +138,11 @@ class Game:
         self.conditions = self.generate_conditions(forced_time=start_time)
 
         self.sanitize_sides(player_faction, enemy_faction)
-        self.blue = Coalition(self, player_faction, player_budget, player=True)
-        self.red = Coalition(self, enemy_faction, enemy_budget, player=False)
+        self.blue = Coalition(self, player_faction, player_budget, player=Player.BLUE)
+        self.red = Coalition(self, enemy_faction, enemy_budget, player=Player.RED)
         neutral_faction = player_faction
         neutral_faction.country = self.neutral_country
-        self.neutral = Coalition(self, neutral_faction, 0, player=False, neutral=True)
+        self.neutral = Coalition(self, neutral_faction, 0, player=Player.NEUTRAL)
         self.blue.set_opponent(self.red)
         self.red.set_opponent(self.blue)
 
@@ -182,10 +181,10 @@ class Game:
     def point_in_world(self, x: float, y: float) -> Point:
         return Point(x, y, self.theater.terrain)
 
-    def ato_for(self, player: bool) -> AirTaskingOrder:
+    def ato_for(self, player: Player) -> AirTaskingOrder:
         return self.coalition_for(player).ato
 
-    def transit_network_for(self, player: bool) -> TransitNetwork:
+    def transit_network_for(self, player: Player) -> TransitNetwork:
         return self.coalition_for(player).transit_network
 
     def generate_conditions(self, forced_time: time | None = None) -> Conditions:
@@ -213,13 +212,13 @@ class Game:
             else:
                 enemy_faction.country = country_with_name("Russia")
 
-    def faction_for(self, player: bool) -> Faction:
+    def faction_for(self, player: Player) -> Faction:
         return self.coalition_for(player).faction
 
-    def faker_for(self, player: bool) -> Faker:
+    def faker_for(self, player: Player) -> Faker:
         return self.coalition_for(player).faker
 
-    def air_wing_for(self, player: bool) -> AirWing:
+    def air_wing_for(self, player: Player) -> AirWing:
         return self.coalition_for(player).air_wing
 
     @property
@@ -233,15 +232,15 @@ class Game:
         else:
             return USAFAggressors
 
-    def coalition_for(self, player: bool, neutral: Optional[bool] = False) -> Coalition:
-        if neutral:
+    def coalition_for(self, player: Player) -> Coalition:
+        if player is Player.NEUTRAL:
             return self.neutral
-        elif player:
+        elif player is Player.BLUE:
             return self.blue
         else:
             return self.red
 
-    def adjust_budget(self, amount: float, player: bool) -> None:
+    def adjust_budget(self, amount: float, player: Player) -> None:
         self.coalition_for(player).adjust_budget(amount)
 
     def on_load(self, game_still_initializing: bool = False) -> None:
@@ -496,7 +495,7 @@ class Game:
         self.current_group_id += 1
         return self.current_group_id
 
-    def compute_transit_network_for(self, player: bool) -> TransitNetwork:
+    def compute_transit_network_for(self, player: Player) -> TransitNetwork:
         return TransitNetworkBuilder(self.theater, player).build()
 
     def compute_threat_zones(self, events: GameUpdateEvents) -> None:
@@ -505,10 +504,10 @@ class Game:
         self.blue.compute_nav_meshes(events)
         self.red.compute_nav_meshes(events)
 
-    def threat_zone_for(self, player: bool) -> ThreatZones:
+    def threat_zone_for(self, player: Player) -> ThreatZones:
         return self.coalition_for(player).threat_zone
 
-    def navmesh_for(self, player: bool) -> NavMesh:
+    def navmesh_for(self, player: Player) -> NavMesh:
         return self.coalition_for(player).nav_mesh
 
     def compute_unculled_zones(self, events: GameUpdateEvents) -> None:

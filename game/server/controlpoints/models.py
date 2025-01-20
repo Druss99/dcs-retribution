@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING
 from uuid import UUID
 
 from pydantic import BaseModel
@@ -10,12 +10,13 @@ from game.server.leaflet import LeafletPoint
 if TYPE_CHECKING:
     from game import Game
     from game.theater import ControlPoint
+    from enum import Enum
 
 
 class ControlPointJs(BaseModel):
     id: UUID
     name: str
-    blue: Optional[bool]
+    blue: Enum
     position: LeafletPoint
     mobile: bool
     destination: LeafletPoint | None

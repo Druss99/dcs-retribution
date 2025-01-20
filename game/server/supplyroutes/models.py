@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Any, TYPE_CHECKING, Optional
+from typing import Any, TYPE_CHECKING
 
 from dcs import Point
 from pydantic import BaseModel
@@ -11,6 +11,7 @@ if TYPE_CHECKING:
     from game import Game
     from game.theater import ControlPoint
     from game.transfers import MultiGroupTransport, TransportMap
+    from enum import Enum
 
 
 class TransportFinder:
@@ -66,7 +67,7 @@ class SupplyRouteJs(BaseModel):
     points: list[LeafletPoint]
     front_active: bool
     is_sea: bool
-    blue: Optional[bool]
+    blue: Enum
     active_transports: list[str]
 
     class Config:

@@ -7,6 +7,7 @@ from game.config import REWARDS
 
 if TYPE_CHECKING:
     from game import Game
+    from game.theater.player import Player
 
 
 @dataclass(frozen=True)
@@ -22,7 +23,7 @@ class BuildingIncome:
 
 
 class Income:
-    def __init__(self, game: Game, player: bool) -> None:
+    def __init__(self, game: Game, player: Player) -> None:
         if player:
             self.multiplier = game.settings.player_income_multiplier
         else:

@@ -19,7 +19,7 @@ from game.config import REWARDS
 from game.data.building_data import FORTIFICATION_BUILDINGS
 from game.server import EventStream
 from game.sim.gameupdateevents import GameUpdateEvents
-from game.theater import ControlPoint, TheaterGroundObject
+from game.theater import ControlPoint, TheaterGroundObject, Player
 from game.theater.theatergroundobject import (
     BuildingGroundObject,
 )
@@ -92,7 +92,7 @@ class QGroundObjectMenu(QDialog):
         else:
             self.mainLayout.addWidget(self.intelBox)
             self.mainLayout.addWidget(self.orientationBox)
-            if self.ground_object.is_iads and self.cp.is_friendly(to_player=False):
+            if self.ground_object.is_iads and self.cp.is_friendly(to_player=Player.RED):
                 self.mainLayout.addWidget(self.hiddenBox)
 
         self.actionLayout = QHBoxLayout()
@@ -118,7 +118,7 @@ class QGroundObjectMenu(QDialog):
 
     @property
     def show_buy_sell_actions(self) -> bool:
-        if self.cp.captured is None:
+        if self.cp.captured is Player.NEUTRAL:
             return False
         buysell_allowed = self.game.settings.enable_enemy_buy_sell
         buysell_allowed |= self.cp.captured

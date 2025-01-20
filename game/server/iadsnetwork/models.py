@@ -5,6 +5,7 @@ from uuid import UUID
 from pydantic import BaseModel
 
 from game.server.leaflet import LeafletPoint
+from game.theater.player import Player
 from game.theater.iadsnetwork.iadsnetwork import IadsNetworkNode, IadsNetwork
 
 
@@ -14,7 +15,7 @@ class IadsConnectionJs(BaseModel):
     node: UUID
     connected: UUID
     active: bool
-    blue: bool
+    blue: Player
     is_power: bool
 
     class Config:
@@ -34,7 +35,9 @@ class IadsConnectionJs(BaseModel):
         iads_connections = []
         tgo = network_node.group.ground_object
         for id, connection in network_node.connections.items():
-            if connection.ground_object.is_friendly(True) != tgo.is_friendly(True):
+            if connection.ground_object.is_friendly(Player.BLUE) != tgo.is_friendly(
+                Player.BLUE
+            ):
                 continue  # Skip connections which are not from same coalition
             iads_connections.append(
                 IadsConnectionJs(
@@ -49,7 +52,7 @@ class IadsConnectionJs(BaseModel):
                         network_node.group.alive_units > 0
                         and connection.alive_units > 0
                     ),
-                    blue=tgo.is_friendly(True),
+                    blue=tgo.is_friendly(Player.BLUE),
                     is_power="power"
                     in [tgo.category, connection.ground_object.category],
                 )

@@ -16,7 +16,7 @@ from uuid import UUID
 
 from game.dcs.aircrafttype import AircraftType
 from game.dcs.groundunittype import GroundUnitType
-from game.theater import Airfield, ControlPoint
+from game.theater import Airfield, ControlPoint, Player
 
 if TYPE_CHECKING:
     from game import Game
@@ -87,7 +87,7 @@ class GroundLosses:
 @dataclass(frozen=True)
 class BaseCaptureEvent:
     control_point: ControlPoint
-    captured_by_player: bool
+    captured_by_player: Player
 
 
 @dataclass(frozen=True)
@@ -279,7 +279,7 @@ class Debriefing:
             if aircraft is None:
                 logging.error(f"Could not find Flight matching {unit_name}")
                 continue
-            if aircraft.flight.departure.captured:
+            if aircraft.flight.departure.captured is Player.BLUE:
                 player_losses.append(aircraft)
             else:
                 enemy_losses.append(aircraft)
@@ -290,7 +290,7 @@ class Debriefing:
         for unit_name in self.state_data.killed_ground_units:
             front_line_unit = self.unit_map.front_line_unit(unit_name)
             if front_line_unit is not None:
-                if front_line_unit.origin.captured:
+                if front_line_unit.origin.captured is Player.BLUE:
                     losses.player_front_line.append(front_line_unit)
                 else:
                     losses.enemy_front_line.append(front_line_unit)
@@ -314,7 +314,9 @@ class Debriefing:
 
             ground_object = self.unit_map.theater_units(unit_name)
             if ground_object is not None:
-                if ground_object.theater_unit.ground_object.is_friendly(to_player=True):
+                if ground_object.theater_unit.ground_object.is_friendly(
+                    to_player=Player.BLUE
+                ):
                     losses.player_ground_objects.append(ground_object)
                 else:
                     losses.enemy_ground_objects.append(ground_object)
@@ -323,7 +325,9 @@ class Debriefing:
             scenery_object = self.unit_map.scenery_object(unit_name)
             # Try appending object to the name, because we do this for building statics.
             if scenery_object is not None:
-                if scenery_object.ground_unit.ground_object.is_friendly(to_player=True):
+                if scenery_object.ground_unit.ground_object.is_friendly(
+                    to_player=Player.BLUE
+                ):
                     losses.player_scenery.append(scenery_object)
                 else:
                     losses.enemy_scenery.append(scenery_object)
@@ -331,7 +335,7 @@ class Debriefing:
 
             airfield = self.unit_map.airfield(unit_name)
             if airfield is not None:
-                if airfield.captured:
+                if airfield.captured is Player.BLUE:
                     losses.player_airfields.append(airfield)
                 else:
                     losses.enemy_airfields.append(airfield)
@@ -377,8 +381,10 @@ class Debriefing:
                 # Captured base is not a part of the campaign. This happens when neutral
                 # bases are near the conflict. Nothing to do.
                 continue
-
-            captured_by_player = int(new_owner_id_str) == blue_coalition_id
+            if int(new_owner_id_str) == blue_coalition_id:
+                captured_by_player = Player.BLUE
+            else:
+                captured_by_player = Player.RED
             if control_point.is_friendly(to_player=captured_by_player):
                 # Base is currently friendly to the new owner. Was captured and
                 # recaptured in the same mission. Nothing to do.

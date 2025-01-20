@@ -33,6 +33,7 @@ from game.theater.controlpoint import (
     Airfield,
     ControlPoint,
     Fob,
+    Player,
 )
 from game.unitmap import UnitMap
 from .aircraftpainter import AircraftPainter
@@ -202,7 +203,7 @@ class AircraftGenerator:
             ):
                 continue
 
-            if control_point.captured:
+            if control_point.captured is Player.BLUE:
                 country = player_country
             else:
                 country = enemy_country

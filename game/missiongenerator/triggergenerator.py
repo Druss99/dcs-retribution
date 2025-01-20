@@ -28,7 +28,7 @@ from dcs.translation import String
 from dcs.triggers import Event, TriggerCondition, TriggerOnce
 from dcs.unit import Skill
 
-from game.theater import Airfield
+from game.theater import Airfield, Player
 from game.theater.controlpoint import Fob, TRIGGER_RADIUS_CAPTURE
 
 if TYPE_CHECKING:
@@ -99,11 +99,11 @@ class TriggerGenerator:
                 raise RuntimeError(
                     f"Could not find {airfield.airport.name} in the mission"
                 )
-            if airfield.captured and player_coalition:
-                cp_airport.set_coalition(player_coalition)
-            elif airfield.captured is None:
+            if airfield.captured is Player.NEUTRAL:
                 cp_airport.set_coalition("neutral")
-            elif not airfield.captured and enemy_coalition:
+            elif airfield.captured is Player.BLUE:
+                cp_airport.set_coalition(player_coalition)
+            elif airfield.captured is Player.RED:
                 cp_airport.set_coalition(enemy_coalition)
 
     def _set_skill(self, player_coalition: str, enemy_coalition: str) -> None:
@@ -141,7 +141,7 @@ class TriggerGenerator:
                         zone = self.mission.triggers.add_triggerzone(
                             location, radius=10, hidden=True, name="MARK"
                         )
-                        if cp.captured:
+                        if cp.captured is Player.BLUE:
                             name = ground_object.obj_name + " [ALLY]"
                         else:
                             name = ground_object.obj_name + " [ENEMY]"
@@ -189,7 +189,7 @@ class TriggerGenerator:
         """
         for cp in self.game.theater.controlpoints:
             if isinstance(cp, self.capture_zone_types) and not cp.is_carrier:
-                if cp.captured:
+                if cp.captured is Player.BLUE:
                     attacking_coalition = enemy_coalition
                     attack_coalition_int = 1  # 1 is the Event int for Red
                     defending_coalition = player_coalition
@@ -245,7 +245,7 @@ class TriggerGenerator:
                 recapture_trigger.add_action(ClearFlag(flag=flag))
                 self.mission.triggerrules.triggers.append(recapture_trigger)
 
-                if cp.captured is None:
+                if cp.captured is Player.NEUTRAL:
                     red_capture_trigger = TriggerCondition(
                         Event.NoEvent, "Capture Trigger"
                     )

@@ -15,7 +15,7 @@ from game.ato.flightwaypoint import FlightWaypoint
 from game.ground_forces.combat_stance import CombatStance
 from game.radio.radios import RadioFrequency
 from game.runways import RunwayData
-from game.theater import ControlPoint, FrontLine
+from game.theater import ControlPoint, FrontLine, Player
 from .aircraft.flightdata import FlightData
 from .missiondata import AwacsInfo, TankerInfo
 from .flotgenerator import JtacInfo
@@ -182,7 +182,7 @@ class BriefingGenerator(MissionInfoGenerator):
     def generate_allied_flights_by_departure(self) -> None:
         """Create iterable to display allied flights grouped by departure airfield."""
         for flight in self.flights:
-            if not flight.client_units and flight.friendly:
+            if not flight.client_units and flight.friendly is Player.BLUE:
                 name = flight.departure.airfield_name
                 if (
                     name in self.allied_flights_by_departure

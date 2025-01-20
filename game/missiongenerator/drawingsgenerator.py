@@ -9,12 +9,13 @@ from game.missiongenerator.frontlineconflictdescription import (
 )
 
 # Misc config settings for objects drawn in ME mission file (and F10 map)
-from game.theater import TRIGGER_RADIUS_CAPTURE
+from game.theater import TRIGGER_RADIUS_CAPTURE, Player
 
 FRONTLINE_COLORS = Rgba(255, 0, 0, 255)
 WHITE = Rgba(255, 255, 255, 255)
 CP_RED = Rgba(255, 0, 0, 80)
 CP_BLUE = Rgba(0, 0, 255, 80)
+CP_NEUTRAL = Rgba(128, 128, 128, 80)
 BLUE_PATH_COLOR = Rgba(0, 0, 255, 100)
 RED_PATH_COLOR = Rgba(255, 0, 0, 100)
 ACTIVE_PATH_COLOR = Rgba(255, 80, 80, 100)
@@ -35,10 +36,12 @@ class DrawingsGenerator:
         Generate cps as circles
         """
         for cp in self.game.theater.controlpoints:
-            if cp.captured:
+            if cp.captured is Player.BLUE:
                 color = CP_BLUE
-            else:
+            elif cp.captured is Player.RED:
                 color = CP_RED
+            else:
+                color = CP_NEUTRAL
             shape = self.player_layer.add_circle(
                 cp.position,
                 TRIGGER_RADIUS_CAPTURE,
@@ -61,9 +64,14 @@ class DrawingsGenerator:
                     continue
                 else:
                     # Determine path color
-                    if cp.captured and destination.captured:
+                    if (
+                        cp.captured is Player.BLUE
+                        and destination.captured is Player.BLUE
+                    ):
                         color = BLUE_PATH_COLOR
-                    elif not cp.captured and not destination.captured:
+                    elif (
+                        cp.captured is Player.RED and destination.captured is Player.RED
+                    ):
                         color = RED_PATH_COLOR
                     else:
                         color = ACTIVE_PATH_COLOR

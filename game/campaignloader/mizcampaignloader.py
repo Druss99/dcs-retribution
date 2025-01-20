@@ -24,6 +24,7 @@ from game.theater.controlpoint import (
     Airfield,
     Carrier,
     ControlPoint,
+    Player,
     Fob,
     Lha,
     OffMapSpawn,
@@ -120,17 +121,13 @@ class MizCampaignLoader:
     def control_point_from_airport(
         self, airport: Airport, ctld_zones: List[Tuple[Point, float]]
     ) -> ControlPoint:
-        starts_neutral = False
         if airport.dynamic_spawn:
-            starts_blue = False
-            starts_neutral = True
+            starting_coalition = Player.NEUTRAL
         elif airport.is_blue():
-            starts_blue = True
+            starting_coalition = Player.BLUE
         else:
-            starts_blue = False
-        cp = Airfield(
-            airport, self.theater, starts_blue, starts_neutral, ctld_zones=ctld_zones
-        )
+            starting_coalition = Player.RED
+        cp = Airfield(airport, self.theater, starting_coalition, ctld_zones=ctld_zones)
 
         # Use the unlimited aircraft option to determine if an airfield should
         # be owned by the player when the campaign is "inverted".
@@ -138,38 +135,39 @@ class MizCampaignLoader:
 
         return cp
 
-    def country(self, blue: bool) -> Country:
-        country = self.mission.country(
-            self.BLUE_COUNTRY.name if blue else self.RED_COUNTRY.name
-        )
+    def country(self, blue: Player) -> Country:
+        if blue is Player.BLUE:
+            country = self.mission.country(self.BLUE_COUNTRY.name)
+        else:
+            country = self.mission.country(self.RED_COUNTRY.name)
         # Should be guaranteed because we initialized them.
         assert country
         return country
 
     @property
     def blue(self) -> Country:
-        return self.country(blue=True)
+        return self.country(blue=Player.BLUE)
 
     @property
     def red(self) -> Country:
-        return self.country(blue=False)
+        return self.country(blue=Player.RED)
 
-    def off_map_spawns(self, blue: bool) -> Iterator[PlaneGroup]:
+    def off_map_spawns(self, blue: Player) -> Iterator[PlaneGroup]:
         for group in self.country(blue).plane_group:
             if group.units[0].type == self.OFF_MAP_UNIT_TYPE:
                 yield group
 
-    def carriers(self, blue: bool) -> Iterator[ShipGroup]:
+    def carriers(self, blue: Player) -> Iterator[ShipGroup]:
         for group in self.country(blue).ship_group:
             if group.units[0].type == self.CV_UNIT_TYPE:
                 yield group
 
-    def lhas(self, blue: bool) -> Iterator[ShipGroup]:
+    def lhas(self, blue: Player) -> Iterator[ShipGroup]:
         for group in self.country(blue).ship_group:
             if group.units[0].type == self.LHA_UNIT_TYPE:
                 yield group
 
-    def fobs(self, blue: bool) -> Iterator[VehicleGroup]:
+    def fobs(self, blue: Player) -> Iterator[VehicleGroup]:
         for group in self.country(blue).vehicle_group:
             if group.units[0].type == self.FOB_UNIT_TYPE:
                 yield group
@@ -289,7 +287,7 @@ class MizCampaignLoader:
                 control_point = self.control_point_from_airport(airport, ctld_zones)
                 control_points[control_point.id] = control_point
 
-        for blue in (False, True):
+        for blue in (Player.RED, Player.BLUE):
             for group in self.off_map_spawns(blue):
                 control_point = OffMapSpawn(
                     str(group.name), group.position, self.theater, starts_blue=blue
@@ -324,13 +322,13 @@ class MizCampaignLoader:
 
     @property
     def front_line_path_groups(self) -> Iterator[VehicleGroup]:
-        for group in self.country(blue=True).vehicle_group:
+        for group in self.country(blue=Player.BLUE).vehicle_group:
             if group.units[0].type == self.FRONT_LINE_UNIT_TYPE:
                 yield group
 
     @property
     def shipping_lane_groups(self) -> Iterator[ShipGroup]:
-        for group in self.country(blue=True).ship_group:
+        for group in self.country(blue=Player.BLUE).ship_group:
             if group.units[0].type == self.SHIPPING_LANE_UNIT_TYPE:
                 yield group
 
@@ -354,7 +352,7 @@ class MizCampaignLoader:
 
     @property
     def cp_convoy_spawns(self) -> Iterator[VehicleGroup]:
-        for group in self.country(blue=True).vehicle_group:
+        for group in self.country(blue=Player.BLUE).vehicle_group:
             if group.units[0].type == self.CP_CONVOY_SPAWN_TYPE:
                 yield group
 

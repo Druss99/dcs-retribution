@@ -17,7 +17,7 @@ from game.procurement import AircraftProcurementRequest
 from game.profiling import MultiEventTracer
 from game.settings import Settings
 from game.squadrons import AirWing
-from game.theater import ConflictTheater
+from game.theater import ConflictTheater, Player
 from game.threatzones import ThreatZones
 
 if TYPE_CHECKING:
@@ -43,7 +43,9 @@ class PackageFulfiller:
 
     @property
     def is_player(self) -> bool:
-        return self.coalition.player
+        if self.coalition.player is Player.BLUE:
+            return True
+        return False
 
     @property
     def ato(self) -> AirTaskingOrder:

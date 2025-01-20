@@ -6,7 +6,7 @@ from game.ato.flighttype import FlightType
 from game.commander.missionproposals import EscortType
 from game.commander.tasks.packageplanningtask import PackagePlanningTask
 from game.commander.theaterstate import TheaterState
-from game.theater import FrontLine
+from game.theater import FrontLine, Player
 
 
 @dataclass
@@ -19,9 +19,11 @@ class PlanCas(PackagePlanningTask[FrontLine]):
         # An exception is made for turn zero since that's not being truly planned, but
         # just to determine what missions should be planned on turn 1 (when there *will*
         # be ground units) and what aircraft should be ordered.
-        enemy_cp = self.target.control_point_friendly_to(
-            player=not state.context.coalition.player
-        )
+        if state.context.coalition.player is Player.BLUE:
+            player = Player.RED
+        else:
+            player = Player.BLUE
+        enemy_cp = self.target.control_point_friendly_to(player)
         if enemy_cp.deployable_front_line_units == 0 and state.context.turn > 0:
             return False
         return super().preconditions_met(state)

@@ -11,6 +11,7 @@ from game.server.leaflet import LeafletPoint
 if TYPE_CHECKING:
     from game import Game
     from game.theater import TheaterGroundObject
+    from enum import Enum
 
 
 class TgoJs(BaseModel):
@@ -18,7 +19,7 @@ class TgoJs(BaseModel):
     name: str
     control_point_name: str
     category: str
-    blue: Optional[bool]
+    blue: Enum
     position: LeafletPoint
     units: list[str]  # TODO: Event stream
     threat_ranges: list[float]  # TODO: Event stream

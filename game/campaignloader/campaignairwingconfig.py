@@ -7,7 +7,7 @@ from dataclasses import dataclass
 from typing import Any, Optional, TYPE_CHECKING, Union
 
 from game.ato.flighttype import FlightType
-from game.theater.controlpoint import ControlPoint
+from game.theater.controlpoint import ControlPoint, Player
 
 if TYPE_CHECKING:
     from game.theater import ConflictTheater
@@ -84,13 +84,19 @@ class CampaignAirWingConfig:
                     base = theater.control_point_named(base_id)
                 except:
                     if base_id == "Red CV":
-                        base = next((c for c in carriers if not c.captured), None)
+                        base = next(
+                            (c for c in carriers if c.captured is Player.RED), None
+                        )
                     elif base_id == "Blue CV":
-                        base = next((c for c in carriers if c.captured), None)
+                        base = next(
+                            (c for c in carriers if c.captured is Player.BLUE), None
+                        )
                     elif base_id == "Red LHA":
-                        base = next((l for l in lhas if not l.captured), None)
+                        base = next((l for l in lhas if l.captured is Player.RED), None)
                     elif base_id == "Blue LHA":
-                        base = next((l for l in lhas if l.captured), None)
+                        base = next(
+                            (l for l in lhas if l.captured is Player.BLUE), None
+                        )
 
             for squadron_data in squadron_configs:
                 if base is None:

@@ -24,7 +24,7 @@ if TYPE_CHECKING:
     from game import Game
     from game.coalition import Coalition
     from game.dcs.aircrafttype import AircraftType
-    from game.theater import ControlPoint, MissionTarget
+    from game.theater import ControlPoint, MissionTarget, Player
     from .operatingbases import OperatingBases
     from .squadrondef import SquadronDef
 
@@ -96,7 +96,7 @@ class Squadron:
         self._livery_pool: list[str] = []
 
     @property
-    def player(self) -> bool:
+    def player(self) -> Player:
         return self.coalition.player
 
     def assign_to_base(self, base: ControlPoint) -> None:

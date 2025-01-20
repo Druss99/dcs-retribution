@@ -5,7 +5,7 @@ from collections import defaultdict
 from datetime import datetime
 from typing import Optional, TYPE_CHECKING
 
-from game.theater import ControlPoint
+from game.theater import ControlPoint, Player
 from .coalition import Coalition
 from .dcs.groundunittype import GroundUnitType
 from .theater.transitnetwork import (
@@ -66,7 +66,7 @@ class GroundUnitOrders:
         bought_units: dict[GroundUnitType, int] = {}
         units_needing_transfer: dict[GroundUnitType, int] = {}
         for unit_type, count in self.units.items():
-            allegiance = "Ally" if self.destination.captured else "Enemy"
+            allegiance = "Ally" if self.destination.captured is Player.BLUE else "Enemy"
             d: dict[GroundUnitType, int]
             if self.destination != ground_unit_source:
                 source = ground_unit_source

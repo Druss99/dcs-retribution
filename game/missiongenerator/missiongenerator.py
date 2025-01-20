@@ -22,7 +22,7 @@ from game.missiongenerator.aircraft.aircraftgenerator import (
 from game.naming import namegen
 from game.radio.radios import RadioFrequency, RadioRegistry, MHz
 from game.radio.tacan import TacanRegistry
-from game.theater import Airfield
+from game.theater import Airfield, Player
 from game.theater.bullseye import Bullseye
 from game.unitmap import UnitMap
 from .briefinggenerator import BriefingGenerator, MissionInfoGenerator
@@ -376,13 +376,10 @@ class MissionGenerator:
                     tmu.theater_unit.position,
                     self.mission.terrain,
                 ).dict()
-                if tmu.theater_unit.ground_object.coalition.player:
-                    warehouse["coalition"] = "blue"
-                elif (
-                    tmu.theater_unit.ground_object.coalition.neutral
-                    and not tmu.theater_unit.ground_object.coalition.player
-                ):
+                if tmu.theater_unit.ground_object.coalition.player is Player.NEUTRAL:
                     warehouse["coalition"] = "neutral"
+                elif tmu.theater_unit.ground_object.coalition.player is Player.BLUE:
+                    warehouse["coalition"] = "blue"
                 else:
                     warehouse["coalition"] = "red"
                 warehouse["dynamicCargo"] = settings.dynamic_cargo

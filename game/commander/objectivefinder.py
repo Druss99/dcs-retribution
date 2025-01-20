@@ -10,6 +10,7 @@ from game.ato.closestairfields import ClosestAirfields, ObjectiveDistanceCache
 from game.theater import (
     Airfield,
     ControlPoint,
+    Player,
     Fob,
     FrontLine,
     MissionTarget,
@@ -35,7 +36,7 @@ MissionTargetType = TypeVar("MissionTargetType", bound=MissionTarget)
 class ObjectiveFinder:
     """Identifies potential objectives for the mission planner."""
 
-    def __init__(self, game: Game, is_player: bool) -> None:
+    def __init__(self, game: Game, is_player: Player) -> None:
         self.game = game
         self.is_player = is_player
 
@@ -216,7 +217,9 @@ class ObjectiveFinder:
 
     def farthest_friendly_control_point(self) -> ControlPoint:
         """Finds the friendly control point that is farthest from any threats."""
-        threat_zones = self.game.threat_zone_for(not self.is_player)
+        threat_zones = self.game.threat_zone_for(
+            Player.RED if self.is_player is Player.BLUE else Player.BLUE
+        )
 
         farthest = None
         max_distance = meters(0)
@@ -234,7 +237,9 @@ class ObjectiveFinder:
 
     def closest_friendly_control_point(self) -> ControlPoint:
         """Finds the friendly control point that is closest to any threats."""
-        threat_zones = self.game.threat_zone_for(not self.is_player)
+        threat_zones = self.game.threat_zone_for(
+            Player.RED if self.is_player is Player.BLUE else Player.BLUE
+        )
 
         closest = None
         min_distance = meters(math.inf)
@@ -258,14 +263,16 @@ class ObjectiveFinder:
         return (
             c
             for c in self.game.theater.controlpoints
-            if not c.is_friendly(self.is_player) and c.captured is not None
+            if not c.is_friendly(self.is_player) and c.captured != Player.NEUTRAL
         )
 
     def prioritized_points(self) -> list[ControlPoint]:
         prioritized = []
         capturable_later = []
         isolated = []
-        for cp in self.game.theater.control_points_for(not self.is_player):
+        for cp in self.game.theater.control_points_for(
+            Player.RED if self.is_player is Player.BLUE else Player.BLUE
+        ):
             if cp.is_isolated:
                 isolated.append(cp)
                 continue
