@@ -73,11 +73,13 @@ class MissionScheduler:
                     continue
                 is_naval_cp = isinstance(package.target, NavalControlPoint)
                 count = carrier_barcaps[package.target]
-                if count >= max_carrier_simultaneous_barcaps and is_naval_cp:
+                if count >= max_carrier_simultaneous_barcaps - 1 and is_naval_cp:
                     previous_cap_end_time[package.target] = departure_time
                     carrier_barcaps[package.target] = 0
-                elif isinstance(package.target, NavalControlPoint):
+                elif is_naval_cp:
                     carrier_barcaps[package.target] += 1
+                elif not is_naval_cp:
+                    previous_cap_end_time[package.target] = departure_time
             elif package.auto_asap:
                 package.set_tot_asap(now)
             elif package.primary_task is FlightType.AEWC:
