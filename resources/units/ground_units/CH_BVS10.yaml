@@ -7,3 +7,4 @@ price: 6
 role: Armoured Personnel Carrier
 variants:
   BV 410: {}
+  "[CH] BvS 10 ATV": {}

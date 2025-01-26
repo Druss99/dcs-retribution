@@ -63,9 +63,9 @@ from game.unitmap import UnitMap
 from game.utils import Heading
 from pydcs_extensions import (
     Char_M551_Sheridan,
-    BV410_RBS70,
-    BV410_RBS90,
-    BV410,
+    CH_BVS10,
+    RBS_70,
+    RBS_90,
     VAB__50,
     VAB_T20_13,
 )
@@ -100,9 +100,6 @@ PRETENSE_AMPHIBIOUS_UNITS = [
     VAB__50,
     VAB_T20_13,
     Char_M551_Sheridan,
-    BV410_RBS70,
-    BV410_RBS90,
-    BV410,
 ]
 
 
