@@ -387,7 +387,7 @@ export type Waypoint = {
 };
 export type Flight = {
   id: string;
-  blue: boolean;
+  blue: EnumType;
   position?: LatLng;
   sidc: string;
   waypoints?: Waypoint[];
@@ -401,7 +401,7 @@ export type Tgo = {
   name: string;
   control_point_name: string;
   category: string;
-  blue: number;
+  blue: EnumType;
   position: LatLng;
   units: string[];
   threat_ranges: number[];
@@ -415,7 +415,7 @@ export type SupplyRoute = {
   points: LatLng[];
   front_active: boolean;
   is_sea: boolean;
-  blue: number;
+  blue: EnumType;
   active_transports: string[];
 };
 export type IadsConnection = {
@@ -424,7 +424,7 @@ export type IadsConnection = {
   node: string;
   connected: string;
   active: boolean;
-  blue: boolean;
+  blue: EnumType;
   is_power: boolean;
 };
 export type IadsNetwork = {
