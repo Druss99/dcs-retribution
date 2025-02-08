@@ -1,3 +1,4 @@
+import { EnumType } from "typescript";
 import { RootState } from "../app/store";
 import { gameLoaded, gameUnloaded } from "./actions";
 import { ThreatZoneContainer, ThreatZones } from "./liberationApi";
@@ -25,7 +26,7 @@ const initialState: ThreatZonesState = {
 };
 
 export interface IThreatZoneUpdate {
-  blue: boolean;
+  blue: EnumType;
   zones: ThreatZones;
 }
 
@@ -35,7 +36,7 @@ export const threatZonesSlice = createSlice({
   reducers: {
     updated: (state, action: PayloadAction<IThreatZoneUpdate[]>) => {
       for (const [blue, zones] of Object.entries(action.payload)) {
-        const data = {blue: (blue === "true"), zones: zones} as unknown as IThreatZoneUpdate
+        const data = {blue: (blue === "1"), zones: zones} as unknown as IThreatZoneUpdate
         if (data.blue) {
           state.zones.blue = data.zones;
         } else {

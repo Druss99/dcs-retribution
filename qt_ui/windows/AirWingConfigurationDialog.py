@@ -45,7 +45,7 @@ from game.dcs.aircrafttype import AircraftType
 from game.persistency import airwing_dir
 from game.squadrons import AirWing, Pilot, Squadron
 from game.squadrons.squadrondef import SquadronDef
-from game.theater import ControlPoint, ParkingType, Airfield
+from game.theater import ControlPoint, ParkingType, Airfield, Player
 from qt_ui.uiconstants import AIRCRAFT_ICONS, ICONS
 from qt_ui.widgets.combos.QSquadronLiverySelector import SquadronLiverySelector
 from qt_ui.widgets.combos.primarytaskselector import PrimaryTaskSelector
@@ -790,7 +790,7 @@ class AirWingConfigurationDialog(QDialog):
         self.tabs = []
         for coalition in game.coalitions:
             coalition_tab = AirWingConfigurationTab(coalition, game, aircraft_present)
-            name = "Blue" if coalition.player else "Red"
+            name = "Blue" if coalition.player is Player.BLUE else "Red"
             self.tab_widget.addTab(coalition_tab, name)
             self.tabs.append(coalition_tab)
 

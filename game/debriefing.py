@@ -45,9 +45,9 @@ class AirLosses:
     def losses(self) -> Iterator[FlyingUnit]:
         return itertools.chain(self.player, self.enemy)
 
-    def by_type(self, player: bool) -> Dict[AircraftType, int]:
+    def by_type(self, player: Player) -> Dict[AircraftType, int]:
         losses_by_type: Dict[AircraftType, int] = defaultdict(int)
-        losses = self.player if player else self.enemy
+        losses = self.player if player is Player.BLUE else self.enemy
         for loss in losses:
             losses_by_type[loss.flight.unit_type] += 1
         return losses_by_type
@@ -166,7 +166,7 @@ class Debriefing:
 
     def merge_simulation_results(self, results: SimulationResults) -> None:
         for air_loss in results.air_losses:
-            if air_loss.flight.squadron.player:
+            if air_loss.flight.squadron.player is Player.BLUE:
                 self.air_losses.player.append(air_loss)
             else:
                 self.air_losses.enemy.append(air_loss)
@@ -209,9 +209,9 @@ class Debriefing:
     def casualty_count(self, control_point: ControlPoint) -> int:
         return len([x for x in self.front_line_losses if x.origin == control_point])
 
-    def front_line_losses_by_type(self, player: bool) -> dict[GroundUnitType, int]:
+    def front_line_losses_by_type(self, player: Player) -> dict[GroundUnitType, int]:
         losses_by_type: dict[GroundUnitType, int] = defaultdict(int)
-        if player:
+        if player is Player.BLUE:
             losses = self.ground_losses.player_front_line
         else:
             losses = self.ground_losses.enemy_front_line
@@ -219,9 +219,9 @@ class Debriefing:
             losses_by_type[loss.unit_type] += 1
         return losses_by_type
 
-    def convoy_losses_by_type(self, player: bool) -> dict[GroundUnitType, int]:
+    def convoy_losses_by_type(self, player: Player) -> dict[GroundUnitType, int]:
         losses_by_type: dict[GroundUnitType, int] = defaultdict(int)
-        if player:
+        if player is Player.BLUE:
             losses = self.ground_losses.player_convoy
         else:
             losses = self.ground_losses.enemy_convoy
@@ -229,9 +229,9 @@ class Debriefing:
             losses_by_type[loss.unit_type] += 1
         return losses_by_type
 
-    def cargo_ship_losses_by_type(self, player: bool) -> dict[GroundUnitType, int]:
+    def cargo_ship_losses_by_type(self, player: Player) -> dict[GroundUnitType, int]:
         losses_by_type: dict[GroundUnitType, int] = defaultdict(int)
-        if player:
+        if player is Player.BLUE:
             ships = self.ground_losses.player_cargo_ships
         else:
             ships = self.ground_losses.enemy_cargo_ships
@@ -240,9 +240,9 @@ class Debriefing:
                 losses_by_type[unit_type] += count
         return losses_by_type
 
-    def airlift_losses_by_type(self, player: bool) -> dict[GroundUnitType, int]:
+    def airlift_losses_by_type(self, player: Player) -> dict[GroundUnitType, int]:
         losses_by_type: dict[GroundUnitType, int] = defaultdict(int)
-        if player:
+        if player is Player.BLUE:
             losses = self.ground_losses.player_airlifts
         else:
             losses = self.ground_losses.enemy_airlifts
@@ -251,9 +251,9 @@ class Debriefing:
                 losses_by_type[unit_type] += 1
         return losses_by_type
 
-    def ground_object_losses_by_type(self, player: bool) -> Dict[str, int]:
+    def ground_object_losses_by_type(self, player: Player) -> Dict[str, int]:
         losses_by_type: Dict[str, int] = defaultdict(int)
-        if player:
+        if player is Player.BLUE:
             losses = self.ground_losses.player_ground_objects
         else:
             losses = self.ground_losses.enemy_ground_objects
@@ -261,9 +261,9 @@ class Debriefing:
             losses_by_type[loss.theater_unit.type.id] += 1
         return losses_by_type
 
-    def scenery_losses_by_type(self, player: bool) -> Dict[str, int]:
+    def scenery_losses_by_type(self, player: Player) -> Dict[str, int]:
         losses_by_type: Dict[str, int] = defaultdict(int)
-        if player:
+        if player is Player.BLUE:
             losses = self.ground_losses.player_scenery
         else:
             losses = self.ground_losses.enemy_scenery
@@ -298,7 +298,7 @@ class Debriefing:
 
             convoy_unit = self.unit_map.convoy_unit(unit_name)
             if convoy_unit is not None:
-                if convoy_unit.convoy.player_owned:
+                if convoy_unit.convoy.player_owned is Player.BLUE:
                     losses.player_convoy.append(convoy_unit)
                 else:
                     losses.enemy_convoy.append(convoy_unit)
@@ -306,7 +306,7 @@ class Debriefing:
 
             cargo_ship = self.unit_map.cargo_ship(unit_name)
             if cargo_ship is not None:
-                if cargo_ship.player_owned:
+                if cargo_ship.player_owned is Player.BLUE:
                     losses.player_cargo_ships.append(cargo_ship)
                 else:
                     losses.enemy_cargo_ships.append(cargo_ship)
@@ -337,7 +337,7 @@ class Debriefing:
             if airfield is not None:
                 if airfield.captured is Player.BLUE:
                     losses.player_airfields.append(airfield)
-                else:
+                elif airfield.captured is Player.RED:
                     losses.enemy_airfields.append(airfield)
                 continue
 
@@ -353,7 +353,7 @@ class Debriefing:
         for unit_name in self.state_data.killed_aircraft:
             airlift_unit = self.unit_map.airlift_unit(unit_name)
             if airlift_unit is not None:
-                if airlift_unit.transfer.player:
+                if airlift_unit.transfer.player is Player.BLUE:
                     losses.player_airlifts.append(airlift_unit)
                 else:
                     losses.enemy_airlifts.append(airlift_unit)

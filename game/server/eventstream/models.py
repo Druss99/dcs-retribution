@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from enum import Enum
 from typing import TYPE_CHECKING
 from uuid import UUID
 
@@ -26,9 +27,9 @@ class GameUpdateEventsJs(BaseModel):
     new_combats: list[FrozenCombatJs]
     updated_combats: list[FrozenCombatJs]
     ended_combats: list[UUID]
-    navmesh_updates: dict[bool, NavMeshJs]
+    navmesh_updates: dict[Enum, NavMeshJs]
     updated_unculled_zones: list[UnculledZoneJs]
-    threat_zones_updated: dict[bool, ThreatZonesJs]
+    threat_zones_updated: dict[Enum, ThreatZonesJs]
     new_flights: list[FlightJs]
     updated_flights: list[FlightJs]
     deleted_flights: set[UUID]

@@ -6,6 +6,7 @@ from dcs import Point
 from pydantic import BaseModel
 
 from game.server.leaflet import LeafletPoint
+from game.theater import Player
 
 if TYPE_CHECKING:
     from game import Game
@@ -94,7 +95,7 @@ class SupplyRouteJs(BaseModel):
             points=[p.latlng() for p in points],
             front_active=not sea and a.front_is_active(b),
             is_sea=sea,
-            blue=a.captured,
+            blue=Player.BLUE if a.captured else Player.RED,
             active_transports=TransportFinder(game, a, b).describe_active_transports(
                 sea
             ),

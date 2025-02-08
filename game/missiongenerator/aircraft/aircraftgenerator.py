@@ -220,12 +220,12 @@ class AircraftGenerator:
             squadron.location, Fob
         )
         if (
-            squadron.coalition.player
+            squadron.coalition.player is Player.BLUE
             and self.game.settings.perf_disable_untasked_blufor_aircraft
         ):
             return
         elif (
-            not squadron.coalition.player
+            not squadron.coalition.player is Player.RED
             and self.game.settings.perf_disable_untasked_opfor_aircraft
         ):
             return
@@ -257,7 +257,7 @@ class AircraftGenerator:
             ).create_idle_aircraft()
             if group:
                 if (
-                    not squadron.coalition.player
+                    squadron.coalition.player is Player.RED
                     and squadron.aircraft.flyable
                     and (
                         self.game.settings.enable_squadron_pilot_limits

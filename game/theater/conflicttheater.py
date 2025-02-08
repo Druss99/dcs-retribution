@@ -174,7 +174,7 @@ class ConflictTheater:
         self, player: Player, state_check: bool = False
     ) -> Iterator[ControlPoint]:
         for point in self.controlpoints:
-            if point.captured is Player:
+            if point.captured is player:
                 if not state_check:
                     yield point
                 elif point.is_carrier and point.runway_is_operational():
@@ -193,6 +193,11 @@ class ConflictTheater:
 
     def enemy_points(self, state_check: bool = False) -> List[ControlPoint]:
         return list(self.control_points_for(player=Player.RED, state_check=state_check))
+
+    def neutral_points(self, state_check: bool = False) -> List[ControlPoint]:
+        return list(
+            self.control_points_for(player=Player.NEUTRAL, state_check=state_check)
+        )
 
     def closest_control_point(
         self, point: Point, allow_naval: bool = False
@@ -262,10 +267,12 @@ class ConflictTheater:
         """
         closest_cps = list()
         distances_to_cp = dict()
-        if cp.captured:
+        if cp.captured is Player.BLUE:
             control_points = self.player_points()
-        else:
+        elif cp.captured is Player.RED:
             control_points = self.enemy_points()
+        elif cp.captured is Player.NEUTRAL:
+            control_points = self.neutral_points()
         for other_cp in control_points:
             if cp == other_cp:
                 continue

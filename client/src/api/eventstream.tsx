@@ -34,15 +34,16 @@ import { unculledZonesUpdated } from "./unculledZonesSlice";
 import { LatLng } from "leaflet";
 import { updateIadsConnection, removeIadsConnection } from "./iadsNetworkSlice";
 import { supplyRoutesUpdated } from "./supplyRoutesSlice";
+import { EnumType } from "typescript";
 
 interface GameUpdateEvents {
   updated_flight_positions: { [id: string]: LatLng };
   new_combats: Combat[];
   updated_combats: Combat[];
   ended_combats: string[];
-  navmesh_updates: {blue: boolean, mesh: NavMesh}[];
+  navmesh_updates: {blue: EnumType, mesh: NavMesh}[];
   updated_unculled_zones: UnculledZone[];
-  threat_zones_updated: {blue: boolean, zones: ThreatZones}[];
+  threat_zones_updated: {blue: EnumType, zones: ThreatZones}[];
   new_flights: Flight[];
   updated_flights: Flight[];
   deleted_flights: string[];

@@ -6,6 +6,7 @@ from uuid import UUID
 from pydantic import BaseModel
 
 from game.server.leaflet import LeafletPoint
+from game.theater import Player
 
 if TYPE_CHECKING:
     from game import Game
@@ -33,9 +34,9 @@ class ControlPointJs(BaseModel):
         return ControlPointJs(
             id=control_point.id,
             name=control_point.name,
-            blue=control_point.captured,
+            blue=Player.BLUE if control_point.captured else Player.RED,
             position=control_point.position.latlng(),
-            mobile=control_point.moveable and control_point.captured,
+            mobile=control_point.moveable and control_point.captured is Player.BLUE,
             destination=destination,
             sidc=str(control_point.sidc()),
         )

@@ -87,7 +87,7 @@ class QGroundObjectMenu(QDialog):
 
         if isinstance(self.ground_object, BuildingGroundObject):
             self.mainLayout.addWidget(self.buildingBox)
-            if self.cp.captured:
+            if self.cp.captured is Player.BLUE:
                 self.mainLayout.addWidget(self.financesBox)
         else:
             self.mainLayout.addWidget(self.intelBox)
@@ -121,7 +121,7 @@ class QGroundObjectMenu(QDialog):
         if self.cp.captured is Player.NEUTRAL:
             return False
         buysell_allowed = self.game.settings.enable_enemy_buy_sell
-        buysell_allowed |= self.cp.captured
+        buysell_allowed |= self.cp.captured is Player.BLUE
         return buysell_allowed
 
     def doLayout(self):
@@ -135,7 +135,11 @@ class QGroundObjectMenu(QDialog):
                     QLabel(f"<b>Unit {str(unit.display_name)}</b>"), i, 0
                 )
 
-                if not unit.alive and unit.repairable and self.cp.captured:
+                if (
+                    not unit.alive
+                    and unit.repairable
+                    and self.cp.captured is Player.BLUE
+                ):
                     price = unit.unit_type.price if unit.unit_type else 0
                     repair = QPushButton(f"Repair [{price}M]")
                     repair.setProperty("style", "btn-success")

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from enum import Enum
 from typing import TYPE_CHECKING
 from uuid import UUID
 
@@ -18,7 +19,7 @@ if TYPE_CHECKING:
 
 class FlightJs(BaseModel):
     id: UUID
-    blue: bool
+    blue: Enum
     position: LeafletPoint | None
     sidc: str
     waypoints: list[FlightWaypointJs] | None

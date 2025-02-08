@@ -7,6 +7,7 @@ from pydantic import BaseModel
 
 from game.data.groups import GroupTask
 from game.server.leaflet import LeafletPoint
+from game.theater import Player
 
 if TYPE_CHECKING:
     from game import Game
@@ -40,7 +41,9 @@ class TgoJs(BaseModel):
             name=tgo.name,
             control_point_name=tgo.control_point.name,
             category=tgo.category,
-            blue=tgo.control_point.captured,
+            blue=(
+                Player.BLUE if tgo.control_point.captured is Player.BLUE else Player.RED
+            ),
             position=tgo.position.latlng(),
             units=[unit.display_name for unit in tgo.units],
             threat_ranges=threat_ranges,

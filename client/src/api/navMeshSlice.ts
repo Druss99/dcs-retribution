@@ -1,3 +1,4 @@
+import { EnumType } from "typescript";
 import { RootState } from "../app/store";
 import { gameLoaded, gameUnloaded } from "./actions";
 import { NavMesh, NavMeshPoly } from "./liberationApi";
@@ -14,7 +15,7 @@ const initialState: NavMeshState = {
 };
 
 export interface INavMeshUpdate {
-  blue: boolean;
+  blue: EnumType;
   mesh: NavMesh;
 }
 
@@ -24,7 +25,7 @@ const navMeshSlice = createSlice({
   reducers: {
     updated: (state, action: PayloadAction<INavMeshUpdate[]>) => {
       for (const [blue, navmesh] of Object.entries(action.payload)) {
-        const data = {blue: (blue === "true"), mesh: navmesh} as unknown as INavMeshUpdate
+        const data = {blue: (blue === "1"), mesh: navmesh} as unknown as INavMeshUpdate
         const polys = data.mesh.polys;
         if (data.blue) {
           state.blue = polys;

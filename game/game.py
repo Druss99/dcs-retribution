@@ -222,15 +222,15 @@ class Game:
         return self.coalition_for(player).air_wing
 
     @property
-    def neutral_country(self) -> Type[Country]:
+    def neutral_country(self) -> Country:
         """Return the best fitting country that can be used as neutral faction in the generated mission"""
         countries_in_use = {self.red.faction.country, self.blue.faction.country}
         if UnitedNationsPeacekeepers not in countries_in_use:
-            return UnitedNationsPeacekeepers
+            return UnitedNationsPeacekeepers()
         elif Switzerland.name not in countries_in_use:
-            return Switzerland
+            return Switzerland()
         else:
-            return USAFAggressors
+            return USAFAggressors()
 
     def coalition_for(self, player: Player) -> Coalition:
         if player is Player.NEUTRAL:
