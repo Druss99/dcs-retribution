@@ -142,7 +142,7 @@ describe("FlightPlansLayer", () => {
               },
               bar: {
                 id: "bar",
-                blue: false,
+                blue: 2,
                 sidc: "",
                 waypoints: [
                   {
@@ -361,7 +361,7 @@ describe("FlightPlansLayer", () => {
             flights: {
               foo: {
                 id: "foo",
-                blue: false,
+                blue: 2,
                 sidc: "",
                 waypoints: [
                   {
