@@ -1,4 +1,3 @@
-import { EnumType } from "typescript";
 import { RootState } from "../app/store";
 import { gameLoaded, gameUnloaded } from "./actions";
 import { NavMesh, NavMeshPoly } from "./liberationApi";
@@ -15,7 +14,7 @@ const initialState: NavMeshState = {
 };
 
 export interface INavMeshUpdate {
-  blue: EnumType;
+  blue: number;
   mesh: NavMesh;
 }
 

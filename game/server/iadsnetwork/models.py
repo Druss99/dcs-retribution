@@ -15,7 +15,7 @@ class IadsConnectionJs(BaseModel):
     node: UUID
     connected: UUID
     active: bool
-    blue: Player
+    blue: int
     is_power: bool
 
     class Config:
@@ -39,6 +39,12 @@ class IadsConnectionJs(BaseModel):
                 Player.BLUE
             ):
                 continue  # Skip connections which are not from same coalition
+            if tgo.is_friendly(Player.BLUE):
+                blue = 1
+            elif tgo.is_friendly(Player.RED):
+                blue = 2
+            else:
+                continue  # Skip neutral
             iads_connections.append(
                 IadsConnectionJs(
                     id=id,
@@ -52,7 +58,7 @@ class IadsConnectionJs(BaseModel):
                         network_node.group.alive_units > 0
                         and connection.alive_units > 0
                     ),
-                    blue=tgo.is_friendly(Player.BLUE),
+                    blue=blue,
                     is_power="power"
                     in [tgo.category, connection.ground_object.category],
                 )

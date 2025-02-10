@@ -3,12 +3,12 @@ import { useAppSelector } from "../../app/hooks";
 import { LayerGroup, Polygon } from "react-leaflet";
 
 interface NavMeshLayerProps {
-  blue: boolean;
+  blue: number;
 }
 
 export default function NavMeshLayer(props: NavMeshLayerProps) {
   const meshes = useAppSelector(selectNavMeshes);
-  const mesh = props.blue ? meshes.blue : meshes.red;
+  const mesh = props.blue === 1 ? meshes.blue : meshes.red;
   return (
     <LayerGroup>
       {mesh.map((zone, idx) => {

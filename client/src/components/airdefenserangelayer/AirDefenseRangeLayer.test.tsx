@@ -16,11 +16,11 @@ jest.mock("react-leaflet", () => ({
 
 describe("colorFor", () => {
   it("has a unique color for each configuration", () => {
-    const params = [
-      [false, false],
-      [false, true],
-      [true, false],
-      [true, true],
+    const params: [number, boolean][] = [
+      [2, false],
+      [2, true],
+      [1, false],
+      [1, true],
     ];
     var colors = new Set<string>();
     for (const [blue, detection] of params) {
@@ -32,13 +32,13 @@ describe("colorFor", () => {
 
 describe("AirDefenseRangeLayer", () => {
   it("draws nothing when there are no TGOs", () => {
-    renderWithProviders(<AirDefenseRangeLayer blue={true} />);
+    renderWithProviders(<AirDefenseRangeLayer blue={1} />);
     expect(mockLayerGroup).toHaveBeenCalledTimes(1);
     expect(mockCircle).not.toHaveBeenCalled();
   });
 
   it("does not draw wrong range types", () => {
-    renderWithProviders(<AirDefenseRangeLayer blue={true} />, {
+    renderWithProviders(<AirDefenseRangeLayer blue={1} />, {
       preloadedState: {
         tgos: {
           tgos: {
@@ -47,7 +47,7 @@ describe("AirDefenseRangeLayer", () => {
               name: "Foo",
               control_point_name: "Bar",
               category: "AA",
-              blue: false,
+              blue: 2,
               position: {
                 lat: 0,
                 lng: 0,
@@ -68,7 +68,7 @@ describe("AirDefenseRangeLayer", () => {
   });
 
   it("draws threat ranges", () => {
-    renderWithProviders(<AirDefenseRangeLayer blue={true} />, {
+    renderWithProviders(<AirDefenseRangeLayer blue={1} />, {
       preloadedState: {
         tgos: {
           tgos: {
@@ -77,7 +77,7 @@ describe("AirDefenseRangeLayer", () => {
               name: "Foo",
               control_point_name: "Bar",
               category: "AA",
-              blue: true,
+              blue: 1,
               position: {
                 lat: 10,
                 lng: 20,
@@ -101,14 +101,14 @@ describe("AirDefenseRangeLayer", () => {
           lng: 20,
         },
         radius: 10,
-        color: colorFor(true, false),
+        color: colorFor(1, false),
         interactive: false,
       })
     );
   });
 
   it("draws detection ranges", () => {
-    renderWithProviders(<AirDefenseRangeLayer blue={true} detection />, {
+    renderWithProviders(<AirDefenseRangeLayer blue={1} detection />, {
       preloadedState: {
         tgos: {
           tgos: {
@@ -117,7 +117,7 @@ describe("AirDefenseRangeLayer", () => {
               name: "Foo",
               control_point_name: "Bar",
               category: "AA",
-              blue: true,
+              blue: 1,
               position: {
                 lat: 10,
                 lng: 20,
@@ -141,7 +141,7 @@ describe("AirDefenseRangeLayer", () => {
           lng: 20,
         },
         radius: 20,
-        color: colorFor(true, true),
+        color: colorFor(1, true),
         interactive: false,
       })
     );

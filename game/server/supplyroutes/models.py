@@ -68,7 +68,7 @@ class SupplyRouteJs(BaseModel):
     points: list[LeafletPoint]
     front_active: bool
     is_sea: bool
-    blue: Enum
+    blue: int
     active_transports: list[str]
 
     class Config:
@@ -78,6 +78,12 @@ class SupplyRouteJs(BaseModel):
     def for_link(
         game: Game, a: ControlPoint, b: ControlPoint, points: list[Point], sea: bool
     ) -> SupplyRouteJs:
+        if a.captured is Player.BLUE:
+            blue = 1
+        elif a.captured is Player.RED:
+            blue = 2
+        else:
+            blue = 0
         return SupplyRouteJs(
             # Although these are not persistent objects in the backend, the frontend
             # needs unique IDs for anything that it will use in a list. That means that
@@ -95,7 +101,7 @@ class SupplyRouteJs(BaseModel):
             points=[p.latlng() for p in points],
             front_active=not sea and a.front_is_active(b),
             is_sea=sea,
-            blue=Player.BLUE if a.captured else Player.RED,
+            blue=blue,
             active_transports=TransportFinder(game, a, b).describe_active_transports(
                 sea
             ),

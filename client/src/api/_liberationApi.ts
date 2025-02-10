@@ -1,4 +1,3 @@
-import { EnumDeclaration, EnumMember, EnumType } from "typescript";
 import { baseApi as api } from "./baseApi";
 
 const injectedRtkApi = api.injectEndpoints({
@@ -387,7 +386,7 @@ export type Waypoint = {
 };
 export type Flight = {
   id: string;
-  blue: EnumType;
+  blue: number;
   position?: LatLng;
   sidc: string;
   waypoints?: Waypoint[];
@@ -401,7 +400,7 @@ export type Tgo = {
   name: string;
   control_point_name: string;
   category: string;
-  blue: EnumType;
+  blue: number;
   position: LatLng;
   units: string[];
   threat_ranges: number[];
@@ -415,7 +414,7 @@ export type SupplyRoute = {
   points: LatLng[];
   front_active: boolean;
   is_sea: boolean;
-  blue: EnumType;
+  blue: number;
   active_transports: string[];
 };
 export type IadsConnection = {
@@ -424,7 +423,7 @@ export type IadsConnection = {
   node: string;
   connected: string;
   active: boolean;
-  blue: EnumType;
+  blue: number;
   is_power: boolean;
 };
 export type IadsNetwork = {

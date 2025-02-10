@@ -1,4 +1,3 @@
-import { EnumType } from "typescript";
 import { RootState } from "../app/store";
 import { gameLoaded, gameUnloaded } from "./actions";
 import { ThreatZoneContainer, ThreatZones } from "./liberationApi";
@@ -26,7 +25,7 @@ const initialState: ThreatZonesState = {
 };
 
 export interface IThreatZoneUpdate {
-  blue: EnumType;
+  blue: number;
   zones: ThreatZones;
 }
 

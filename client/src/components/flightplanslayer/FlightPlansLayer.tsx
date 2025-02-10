@@ -5,7 +5,7 @@ import FlightPlan from "../flightplan";
 import { LayerGroup } from "react-leaflet";
 
 interface FlightPlansLayerProps {
-  blue?: boolean;
+  blue?: number;
   selectedOnly?: true;
 }
 

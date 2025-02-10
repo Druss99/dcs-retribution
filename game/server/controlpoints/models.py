@@ -17,7 +17,7 @@ if TYPE_CHECKING:
 class ControlPointJs(BaseModel):
     id: UUID
     name: str
-    blue: Enum
+    blue: int
     position: LeafletPoint
     mobile: bool
     destination: LeafletPoint | None
@@ -31,10 +31,16 @@ class ControlPointJs(BaseModel):
         destination = None
         if control_point.target_position is not None:
             destination = control_point.target_position.latlng()
+        if control_point.captured is Player.NEUTRAL:
+            blue = 0
+        elif control_point.captured is Player.BLUE:
+            blue = 1
+        else:
+            blue = 2
         return ControlPointJs(
             id=control_point.id,
             name=control_point.name,
-            blue=Player.BLUE if control_point.captured else Player.RED,
+            blue=blue,
             position=control_point.position.latlng(),
             mobile=control_point.moveable and control_point.captured is Player.BLUE,
             destination=destination,

@@ -1,4 +1,3 @@
-import { EnumType } from "typescript";
 import { Tgo } from "../../api/liberationApi";
 import { selectTgos } from "../../api/tgosSlice";
 import { useAppSelector } from "../../app/hooks";
@@ -6,12 +5,12 @@ import { Circle, LayerGroup } from "react-leaflet";
 
 interface TgoRangeCirclesProps {
   tgo: Tgo;
-  blue: EnumType;
+  blue: number;
   detection?: boolean;
 }
 
-export function colorFor(blue: EnumType, detection: boolean) {
-  if (Number(blue) === 1) {
+export function colorFor(blue: number, detection: boolean) {
+  if (blue === 1) {
     return detection ? "#bb89ff" : "#0084ff";
   }
   return detection ? "#eee17b" : "#c85050";
@@ -44,7 +43,7 @@ const TgoRangeCircles = (props: TgoRangeCirclesProps) => {
 };
 
 interface AirDefenseRangeLayerProps {
-  blue: EnumType;
+  blue: number;
   detection?: boolean;
 }
 

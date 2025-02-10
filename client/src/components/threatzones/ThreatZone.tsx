@@ -3,11 +3,11 @@ import { Polygon } from "react-leaflet";
 
 interface ThreatZoneProps {
   poly: LatLng[][];
-  blue: boolean;
+  blue: number;
 }
 
 export default function ThreatZone(props: ThreatZoneProps) {
-  const color = props.blue ? "#0084ff" : "#c85050";
+  const color = props.blue === 1 ? "#0084ff" : "#c85050";
   return (
     <Polygon
       positions={props.poly}

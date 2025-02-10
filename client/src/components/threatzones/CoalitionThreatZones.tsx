@@ -2,11 +2,11 @@ import { ThreatZoneFilter, ThreatZonesLayer } from "./ThreatZonesLayer";
 import { LayersControl } from "react-leaflet";
 
 interface CoalitionThreatZonesProps {
-  blue: boolean;
+  blue: number;
 }
 
 export function CoalitionThreatZones(props: CoalitionThreatZonesProps) {
-  const color = props.blue ? "Blue" : "Red";
+  const color = props.blue === 1 ? "Blue" : "Red";
   return (
     <>
       <LayersControl.Overlay name={`${color} threat zones: full`}>

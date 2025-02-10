@@ -33,7 +33,7 @@ describe("NavMeshLayer", () => {
         { lat: 1, lng: 0 },
       ],
     ];
-    renderWithProviders(<NavMeshLayer blue={true} />, {
+    renderWithProviders(<NavMeshLayer blue={1} />, {
       preloadedState: {
         navmeshes: {
           blue: [
@@ -79,7 +79,7 @@ describe("NavMeshLayer", () => {
     expect(mockLayerGroup).toHaveBeenCalledTimes(1);
   });
   it("draws red navmesh", () => {
-    renderWithProviders(<NavMeshLayer blue={false} />, {
+    renderWithProviders(<NavMeshLayer blue={2} />, {
       preloadedState: {
         navmeshes: {
           blue: [

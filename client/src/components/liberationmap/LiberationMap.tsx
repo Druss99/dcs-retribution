@@ -81,41 +81,41 @@ export default function LiberationMap() {
           <FrontLinesLayer />
         </LayersControl.Overlay>
         <LayersControl.Overlay name="Enemy SAM threat range" checked>
-          <AirDefenseRangeLayer blue={false} />
+          <AirDefenseRangeLayer blue={2} />
         </LayersControl.Overlay>
         <LayersControl.Overlay name="Enemy SAM detection range">
-          <AirDefenseRangeLayer blue={false} detection />
+          <AirDefenseRangeLayer blue={2} detection />
         </LayersControl.Overlay>
         <LayersControl.Overlay name="Enemy IADS Network">
-          <Iadsnetworklayer blue={false} />
+          <Iadsnetworklayer blue={2} />
         </LayersControl.Overlay>
         <LayersControl.Overlay name="Allied SAM threat range">
-          <AirDefenseRangeLayer blue={true} />
+          <AirDefenseRangeLayer blue={1} />
         </LayersControl.Overlay>
         <LayersControl.Overlay name="Allied SAM detection range">
-          <AirDefenseRangeLayer blue={true} detection />
+          <AirDefenseRangeLayer blue={1} detection />
         </LayersControl.Overlay>
         <LayersControl.Overlay name="Allied IADS Network">
-          <Iadsnetworklayer blue={true} />
+          <Iadsnetworklayer blue={1} />
         </LayersControl.Overlay>
         <LayersControl.Overlay name="Selected flight plan">
           <FlightPlansLayer selectedOnly />
         </LayersControl.Overlay>
         <LayersControl.Overlay name="All blue flight plans" checked>
-          <FlightPlansLayer blue={true} />
+          <FlightPlansLayer blue={1} />
         </LayersControl.Overlay>
         <LayersControl.Overlay name="All red flight plans">
-          <FlightPlansLayer blue={false} />
+          <FlightPlansLayer blue={2} />
         </LayersControl.Overlay>
       </LayersControl>
       <LayersControl position="topleft">
-        <CoalitionThreatZones blue={true} />
-        <CoalitionThreatZones blue={false} />
+        <CoalitionThreatZones blue={1} />
+        <CoalitionThreatZones blue={2} />
         <LayersControl.Overlay name="Blue navmesh">
-          <NavMeshLayer blue={true} />
+          <NavMeshLayer blue={1} />
         </LayersControl.Overlay>
         <LayersControl.Overlay name="Red navmesh">
-          <NavMeshLayer blue={false} />
+          <NavMeshLayer blue={2} />
         </LayersControl.Overlay>
         <TerrainZonesLayers />
         <CullingExclusionZones />

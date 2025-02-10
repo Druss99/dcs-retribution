@@ -5,7 +5,7 @@ import { selectIadsNetwork } from "../../api/iadsNetworkSlice";
 
 
 interface IadsNetworkLayerProps {
-  blue: boolean;
+  blue: number;
 }
 
 export const IadsNetworkLayer = (props: IadsNetworkLayerProps) => {

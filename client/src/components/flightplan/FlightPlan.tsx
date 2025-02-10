@@ -18,7 +18,7 @@ interface FlightPlanProps {
 const pathColor = (props: FlightPlanProps) => {
   if (props.selected && props.highlight) {
     return SELECTED_PATH;
-  } else if (props.flight.blue) {
+  } else if (props.flight.blue === 1) {
     return BLUE_PATH;
   } else {
     return RED_PATH;
