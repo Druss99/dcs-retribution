@@ -27,7 +27,7 @@ test("layer has aircraft if non-empty", async () => {
         flights: {
           foo: {
             id: "foo",
-            blue: true,
+            blue: 1,
             sidc: "",
             position: {
               lat: 0,
@@ -36,7 +36,7 @@ test("layer has aircraft if non-empty", async () => {
           },
           bar: {
             id: "bar",
-            blue: false,
+            blue: 2,
             sidc: "",
             position: {
               lat: 0,

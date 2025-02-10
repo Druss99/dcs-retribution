@@ -14,7 +14,7 @@ test("grounded aircraft do not render", async () => {
     <Aircraft
       flight={{
         id: "",
-        blue: true,
+        blue: 1,
         position: undefined,
         sidc: "",
         waypoints: [],
@@ -30,7 +30,7 @@ test("in-flight aircraft render", async () => {
     <Aircraft
       flight={{
         id: "",
-        blue: true,
+        blue: 1,
         position: {
           lat: 10,
           lng: 20,

@@ -20,13 +20,13 @@ jest.mock("react-leaflet", () => ({
 describe("FlightPlansLayer", () => {
   describe("unselected flights", () => {
     it("are drawn", () => {
-      renderWithProviders(<FlightPlansLayer blue={true} />, {
+      renderWithProviders(<FlightPlansLayer blue={1} />, {
         preloadedState: {
           flights: {
             flights: {
               foo: {
                 id: "foo",
-                blue: true,
+                blue: 1,
                 sidc: "",
                 waypoints: [
                   {
@@ -59,7 +59,7 @@ describe("FlightPlansLayer", () => {
               },
               bar: {
                 id: "bar",
-                blue: true,
+                blue: 1,
                 sidc: "",
                 waypoints: [
                   {
@@ -103,13 +103,13 @@ describe("FlightPlansLayer", () => {
       expect(mockLayerGroup).toBeCalledTimes(2);
     });
     it("are not drawn if wrong coalition", () => {
-      renderWithProviders(<FlightPlansLayer blue={true} />, {
+      renderWithProviders(<FlightPlansLayer blue={1} />, {
         preloadedState: {
           flights: {
             flights: {
               foo: {
                 id: "foo",
-                blue: true,
+                blue: 1,
                 sidc: "",
                 waypoints: [
                   {
@@ -188,7 +188,7 @@ describe("FlightPlansLayer", () => {
             flights: {
               foo: {
                 id: "foo",
-                blue: true,
+                blue: 1,
                 sidc: "",
                 waypoints: [
                   {
@@ -230,13 +230,13 @@ describe("FlightPlansLayer", () => {
   });
   describe("selected flights", () => {
     it("are drawn", () => {
-      renderWithProviders(<FlightPlansLayer blue={true} />, {
+      renderWithProviders(<FlightPlansLayer blue={1} />, {
         preloadedState: {
           flights: {
             flights: {
               foo: {
                 id: "foo",
-                blue: true,
+                blue: 1,
                 sidc: "",
                 waypoints: [
                   {
@@ -269,7 +269,7 @@ describe("FlightPlansLayer", () => {
               },
               bar: {
                 id: "bar",
-                blue: true,
+                blue: 1,
                 sidc: "",
                 waypoints: [
                   {
@@ -309,13 +309,13 @@ describe("FlightPlansLayer", () => {
       expect(mockLayerGroup).toBeCalledTimes(1);
     });
     it("are not drawn twice", () => {
-      renderWithProviders(<FlightPlansLayer blue={true} />, {
+      renderWithProviders(<FlightPlansLayer blue={1} />, {
         preloadedState: {
           flights: {
             flights: {
               foo: {
                 id: "foo",
-                blue: true,
+                blue: 1,
                 sidc: "",
                 waypoints: [
                   {
@@ -402,7 +402,7 @@ describe("FlightPlansLayer", () => {
     });
   });
   it("are not drawn if there are no flights", () => {
-    renderWithProviders(<FlightPlansLayer blue={true} />);
+    renderWithProviders(<FlightPlansLayer blue={1} />);
     expect(mockPolyline).not.toHaveBeenCalled();
     expect(mockLayerGroup).toBeCalledTimes(1);
   });
