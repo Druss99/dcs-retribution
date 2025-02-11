@@ -12,7 +12,6 @@ from game.theater import Player
 if TYPE_CHECKING:
     from game import Game
     from game.theater import TheaterGroundObject
-    from enum import Enum
 
 
 class TgoJs(BaseModel):
@@ -20,7 +19,7 @@ class TgoJs(BaseModel):
     name: str
     control_point_name: str
     category: str
-    blue: int
+    blue: bool
     position: LeafletPoint
     units: list[str]  # TODO: Event stream
     threat_ranges: list[float]  # TODO: Event stream
@@ -36,12 +35,10 @@ class TgoJs(BaseModel):
     def for_tgo(tgo: TheaterGroundObject) -> TgoJs:
         threat_ranges = [group.max_threat_range().meters for group in tgo.groups]
         detection_ranges = [group.max_detection_range().meters for group in tgo.groups]
-        if tgo.control_point.captured is Player.NEUTRAL:
-            blue = 0
-        elif tgo.control_point.captured is Player.BLUE:
-            blue = 1
+        if tgo.control_point.captured is Player.BLUE:
+            blue = True
         else:
-            blue = 2
+            blue = False
         return TgoJs(
             id=tgo.id,
             name=tgo.name,

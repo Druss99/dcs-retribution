@@ -11,13 +11,13 @@ export enum ThreatZoneFilter {
 }
 
 interface ThreatZonesLayerProps {
-  blue: number;
+  blue: boolean;
   filter: ThreatZoneFilter;
 }
 
 export function ThreatZonesLayer(props: ThreatZonesLayerProps) {
   const allZones = useAppSelector(selectThreatZones).zones;
-  const zones = props.blue === 1 ? allZones.blue : allZones.red;
+  const zones = props.blue ? allZones.blue : allZones.red;
   var filtered;
   switch (props.filter) {
     case ThreatZoneFilter.FULL:

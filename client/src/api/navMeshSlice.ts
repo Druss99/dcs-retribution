@@ -14,7 +14,7 @@ const initialState: NavMeshState = {
 };
 
 export interface INavMeshUpdate {
-  blue: number;
+  blue: boolean;
   mesh: NavMesh;
 }
 
@@ -24,7 +24,7 @@ const navMeshSlice = createSlice({
   reducers: {
     updated: (state, action: PayloadAction<INavMeshUpdate[]>) => {
       for (const [blue, navmesh] of Object.entries(action.payload)) {
-        const data = {blue: (blue === "1"), mesh: navmesh} as unknown as INavMeshUpdate
+        const data = {blue: (blue === "true"), mesh: navmesh} as unknown as INavMeshUpdate
         const polys = data.mesh.polys;
         if (data.blue) {
           state.blue = polys;

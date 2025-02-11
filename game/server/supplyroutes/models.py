@@ -12,7 +12,6 @@ if TYPE_CHECKING:
     from game import Game
     from game.theater import ControlPoint
     from game.transfers import MultiGroupTransport, TransportMap
-    from enum import Enum
 
 
 class TransportFinder:
@@ -68,7 +67,7 @@ class SupplyRouteJs(BaseModel):
     points: list[LeafletPoint]
     front_active: bool
     is_sea: bool
-    blue: int
+    blue: bool
     active_transports: list[str]
 
     class Config:
@@ -79,11 +78,9 @@ class SupplyRouteJs(BaseModel):
         game: Game, a: ControlPoint, b: ControlPoint, points: list[Point], sea: bool
     ) -> SupplyRouteJs:
         if a.captured is Player.BLUE:
-            blue = 1
-        elif a.captured is Player.RED:
-            blue = 2
+            blue = True
         else:
-            blue = 0
+            blue = False
         return SupplyRouteJs(
             # Although these are not persistent objects in the backend, the frontend
             # needs unique IDs for anything that it will use in a list. That means that

@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-from enum import Enum
 from typing import TYPE_CHECKING
 from uuid import UUID
 
@@ -11,6 +10,7 @@ from game.ato.flightstate.killed import Killed
 from game.server.leaflet import LeafletPoint
 from game.server.waypoints.models import FlightWaypointJs
 from game.server.waypoints.routes import waypoints_for_flight
+from game.theater import Player
 
 if TYPE_CHECKING:
     from game import Game
@@ -19,7 +19,7 @@ if TYPE_CHECKING:
 
 class FlightJs(BaseModel):
     id: UUID
-    blue: Enum
+    blue: bool
     position: LeafletPoint | None
     sidc: str
     waypoints: list[FlightWaypointJs] | None
@@ -42,9 +42,13 @@ class FlightJs(BaseModel):
         waypoints = None
         if with_waypoints:
             waypoints = waypoints_for_flight(flight)
+        if flight.blue is Player.BLUE:
+            blue = True
+        else:
+            blue = False
         return FlightJs(
             id=flight.id,
-            blue=flight.blue,
+            blue=blue,
             position=position,
             sidc=str(flight.sidc()),
             waypoints=waypoints,

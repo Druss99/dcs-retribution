@@ -24,7 +24,7 @@ describe("ControlPointsLayer", () => {
             foo: {
               id: "foo",
               name: "Foo",
-              blue: 1,
+              blue: true,
               position: new LatLng(0, 0),
               mobile: false,
               sidc: "",
@@ -32,16 +32,8 @@ describe("ControlPointsLayer", () => {
             bar: {
               id: "bar",
               name: "Bar",
-              blue: 2,
+              blue: false,
               position: new LatLng(1, 0),
-              mobile: false,
-              sidc: "",
-            },
-            foobar: {
-              id: "foobar",
-              name: "FooBar",
-              blue: 0,
-              position: new LatLng(2, 0),
               mobile: false,
               sidc: "",
             },

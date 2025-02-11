@@ -34,13 +34,10 @@ function colorFor(route: SupplyRouteModel) {
   if (route.front_active) {
     return "#c85050";
   }
-  if (route.blue === 1) {
+  if (route.blue) {
     return "#2d3e50";
   }
-  if (route.blue === 2) {
-    return "#8c1414";
-  }
-  return "#999999";
+  return "#8c1414";
 }
 
 export default function SupplyRoute(props: SupplyRouteProps) {

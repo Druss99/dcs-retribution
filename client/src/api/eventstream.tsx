@@ -40,9 +40,9 @@ interface GameUpdateEvents {
   new_combats: Combat[];
   updated_combats: Combat[];
   ended_combats: string[];
-  navmesh_updates: {blue: number, mesh: NavMesh}[];
+  navmesh_updates: {blue: boolean, mesh: NavMesh}[];
   updated_unculled_zones: UnculledZone[];
-  threat_zones_updated: {blue: number, zones: ThreatZones}[];
+  threat_zones_updated: {blue: boolean, zones: ThreatZones}[];
   new_flights: Flight[];
   updated_flights: Flight[];
   deleted_flights: string[];

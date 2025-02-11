@@ -344,7 +344,7 @@ export type LatLng = {
 export type ControlPoint = {
   id: string;
   name: string;
-  blue: number;
+  blue: boolean;
   position: LatLng;
   mobile: boolean;
   destination?: LatLng;
@@ -386,7 +386,7 @@ export type Waypoint = {
 };
 export type Flight = {
   id: string;
-  blue: number;
+  blue: boolean;
   position?: LatLng;
   sidc: string;
   waypoints?: Waypoint[];
@@ -400,7 +400,7 @@ export type Tgo = {
   name: string;
   control_point_name: string;
   category: string;
-  blue: number;
+  blue: boolean;
   position: LatLng;
   units: string[];
   threat_ranges: number[];
@@ -414,7 +414,7 @@ export type SupplyRoute = {
   points: LatLng[];
   front_active: boolean;
   is_sea: boolean;
-  blue: number;
+  blue: boolean;
   active_transports: string[];
 };
 export type IadsConnection = {
@@ -423,7 +423,7 @@ export type IadsConnection = {
   node: string;
   connected: string;
   active: boolean;
-  blue: number;
+  blue: boolean;
   is_power: boolean;
 };
 export type IadsNetwork = {

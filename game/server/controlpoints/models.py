@@ -11,13 +11,12 @@ from game.theater import Player
 if TYPE_CHECKING:
     from game import Game
     from game.theater import ControlPoint
-    from enum import Enum
 
 
 class ControlPointJs(BaseModel):
     id: UUID
     name: str
-    blue: int
+    blue: bool
     position: LeafletPoint
     mobile: bool
     destination: LeafletPoint | None
@@ -31,12 +30,10 @@ class ControlPointJs(BaseModel):
         destination = None
         if control_point.target_position is not None:
             destination = control_point.target_position.latlng()
-        if control_point.captured is Player.NEUTRAL:
-            blue = 0
-        elif control_point.captured is Player.BLUE:
-            blue = 1
+        if control_point.captured is Player.BLUE:
+            blue = True
         else:
-            blue = 2
+            blue = False
         return ControlPointJs(
             id=control_point.id,
             name=control_point.name,

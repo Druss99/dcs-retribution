@@ -5,12 +5,12 @@ import { Circle, LayerGroup } from "react-leaflet";
 
 interface TgoRangeCirclesProps {
   tgo: Tgo;
-  blue: number;
+  blue: boolean;
   detection?: boolean;
 }
 
-export function colorFor(blue: number, detection: boolean) {
-  if (blue === 1) {
+export function colorFor(blue: boolean, detection: boolean) {
+  if (blue) {
     return detection ? "#bb89ff" : "#0084ff";
   }
   return detection ? "#eee17b" : "#c85050";
@@ -43,7 +43,7 @@ const TgoRangeCircles = (props: TgoRangeCirclesProps) => {
 };
 
 interface AirDefenseRangeLayerProps {
-  blue: number;
+  blue: boolean;
   detection?: boolean;
 }
 

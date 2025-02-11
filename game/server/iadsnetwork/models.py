@@ -15,7 +15,7 @@ class IadsConnectionJs(BaseModel):
     node: UUID
     connected: UUID
     active: bool
-    blue: int
+    blue: bool
     is_power: bool
 
     class Config:
@@ -40,9 +40,9 @@ class IadsConnectionJs(BaseModel):
             ):
                 continue  # Skip connections which are not from same coalition
             if tgo.is_friendly(Player.BLUE):
-                blue = 1
+                blue = True
             elif tgo.is_friendly(Player.RED):
-                blue = 2
+                blue = False
             else:
                 continue  # Skip neutral
             iads_connections.append(
