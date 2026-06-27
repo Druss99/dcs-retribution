@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
     inputs:
       tag:
-        description: 'Version tag to release (e.g. 1.6.0). Tag MUST already exist.'
+        description: 'Version tag to release (e.g. 1.6.0). Tag will be created if it does not exist.'
         required: true
         type: string
 
@@ -25,15 +25,6 @@ jobs:
     permissions:
       contents: write
     steps:
-      - name: Validate tag exists (workflow_dispatch only)
-        if: github.event_name == 'workflow_dispatch'
-        shell: bash
-        run: |
-          if ! git ls-remote --tags origin "refs/tags/${{ inputs.tag }}" | grep -q .; then
-            echo "::error::Tag '${{ inputs.tag }}' does not exist. Create the tag first with: git tag ${{ inputs.tag }} && git push --tags"
-            exit 1
-          fi
-
       - uses: actions/checkout@v4
         with:
           ref: ${{ inputs.tag || github.ref }}
