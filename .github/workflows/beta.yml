@@ -1,0 +1,93 @@
+name: Beta (Release Candidate)
+
+on:
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: 'Branch to build RC from'
+        required: true
+        default: 'dev'
+        type: string
+
+jobs:
+  lint:
+    uses: ./.github/workflows/lint.yml
+  test:
+    uses: ./.github/workflows/test.yml
+
+  build:
+    needs: [lint, test]
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.branch }}
+          submodules: true
+          fetch-depth: 0
+
+      - name: Set up Python environment
+        uses: ./.github/actions/setup-liberation-python
+
+      - name: Set up JS environment
+        uses: ./.github/actions/setup-liberation-js
+
+      - name: Get version and compute RC number
+        id: version
+        shell: pwsh
+        run: |
+          $content = Get-Content game/version.py -Raw
+          $major = [regex]::Match($content, 'MAJOR_VERSION\s*=\s*(\d+)').Groups[1].Value
+          $minor = [regex]::Match($content, 'MINOR_VERSION\s*=\s*(\d+)').Groups[1].Value
+          $micro = [regex]::Match($content, 'MICRO_VERSION\s*=\s*(\d+)').Groups[1].Value
+          $base = "${major}.${minor}.${micro}"
+
+          # Find highest existing rcN tag for this version
+          $existing = git tag -l "v${base}-rc*" | ForEach-Object {
+            if ($_ -match 'rc(\d+)$') { [int]$Matches[1] } else { 0 }
+          } | Sort-Object -Descending | Select-Object -First 1
+
+          if ($null -eq $existing) { $next = 1 } else { $next = $existing + 1 }
+
+          $tag = "v${base}-rc${next}"
+          Write-Output "tag=$tag" >> $env:GITHUB_OUTPUT
+          Write-Output "version=$base" >> $env:GITHUB_OUTPUT
+          Write-Output "rc=$next" >> $env:GITHUB_OUTPUT
+
+      - name: Set build number
+        run: |
+          [IO.File]::WriteAllLines($pwd.path + "\resources\buildnumber", $env:GITHUB_RUN_NUMBER)
+          [IO.File]::WriteAllLines($pwd.path + "\resources\gitsha", $env:GITHUB_SHA)
+
+      - name: Build app
+        uses: ./.github/actions/build-app
+
+      - name: Create archive
+        run: |
+          Compress-Archive -Path .\dist\dcs-retribution\ -DestinationPath "dist\dcs-retribution.${{ steps.version.outputs.tag }}.zip"
+
+      - name: Extract release notes
+        shell: pwsh
+        run: |
+          $changelog = Get-Content .\changelog.md
+          $last_change = ($changelog | Select-String -Pattern "^#\s" | Select-Object -Skip 1 -First 1).LineNumber - 2
+          ($changelog | Select-Object -First $last_change) -join "`n" | Out-File .\releasenotes.md
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.version.outputs.tag }}
+          name: "${{ steps.version.outputs.tag }}"
+          body_path: releasenotes.md
+          prerelease: true
+          files: dist/dcs-retribution.${{ steps.version.outputs.tag }}.zip
+
+      - name: Send status to Discord
+        uses: stegzilla/discord-notify@v2
+        with:
+          webhook_url: ${{ secrets.discord_webhook_betas }}
+          title: "Release Candidate ${{ steps.version.outputs.tag }} available!"
+          message: "**Branch:** ${{ inputs.branch }}\n**Download:** https://github.com/${{ github.repository }}/releases/tag/${{ steps.version.outputs.tag }}"
+          include_image: true
+          avatar_url: https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png
+          username: GitHub Build Notifier
+        if: github.repository == 'Druss99/dcs-retribution'

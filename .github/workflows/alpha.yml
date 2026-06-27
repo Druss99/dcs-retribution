@@ -1,0 +1,97 @@
+name: Alpha
+
+on:
+  push:
+    branches: [dev]
+  workflow_dispatch:
+
+jobs:
+  lint:
+    uses: ./.github/workflows/lint.yml
+  test:
+    uses: ./.github/workflows/test.yml
+
+  build:
+    needs: [lint, test]
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: true
+
+      - name: Set up Python environment
+        uses: ./.github/actions/setup-liberation-python
+
+      - name: Set up JS environment
+        uses: ./.github/actions/setup-liberation-js
+
+      - name: Get version from source
+        id: version
+        shell: pwsh
+        run: |
+          $content = Get-Content game/version.py -Raw
+          $major = [regex]::Match($content, 'MAJOR_VERSION\s*=\s*(\d+)').Groups[1].Value
+          $minor = [regex]::Match($content, 'MINOR_VERSION\s*=\s*(\d+)').Groups[1].Value
+          $micro = [regex]::Match($content, 'MICRO_VERSION\s*=\s*(\d+)').Groups[1].Value
+          $sha = $env:GITHUB_SHA.Substring(0, 7)
+          $tag = "v${major}.${minor}.${micro}-alpha.${sha}"
+          Write-Output "tag=$tag" >> $env:GITHUB_OUTPUT
+
+      - name: Set build number
+        run: |
+          [IO.File]::WriteAllLines($pwd.path + "\resources\buildnumber", $env:GITHUB_RUN_NUMBER)
+          [IO.File]::WriteAllLines($pwd.path + "\resources\gitsha", $env:GITHUB_SHA)
+
+      - name: Build app
+        uses: ./.github/actions/build-app
+
+      - name: Create archive
+        run: |
+          Compress-Archive -Path .\dist\dcs-retribution\ -DestinationPath "dist\dcs-retribution.${{ steps.version.outputs.tag }}.zip"
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.version.outputs.tag }}
+          name: ${{ steps.version.outputs.tag }}
+          body: |
+            **Alpha build** from `dev` branch.
+
+            Commit: ${{ github.sha }}
+            Build: #${{ github.run_number }}
+
+            This is an alpha build, bugs may be present.
+          prerelease: true
+          files: dist/dcs-retribution.${{ steps.version.outputs.tag }}.zip
+
+      - name: Send status to Discord
+        uses: stegzilla/discord-notify@v2
+        with:
+          webhook_url: ${{ secrets.discord_webhook_alphas }}
+          title: "Alpha ${{ steps.version.outputs.tag }} available!"
+          message: "**Download:** https://github.com/${{ github.repository }}/releases/tag/${{ steps.version.outputs.tag }}"
+          include_image: true
+          avatar_url: https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png
+          username: GitHub Build Notifier
+        if: github.repository == 'Druss99/dcs-retribution'
+
+  cleanup:
+    needs: [build]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Cleanup alpha releases older than 7 days
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          cutoff=$(date -d '7 days ago' -u +%Y-%m-%dT%H:%M:%SZ)
+          gh release list --limit 100 --json tagName,createdAt,isPrerelease \
+            | jq -r ".[] | select(.isPrerelease and (.tagName | contains(\"alpha\")) and (.createdAt < \"$cutoff\")) | .tagName" \
+            | while read -r tag; do
+                echo "Deleting old alpha release: $tag"
+                gh release delete "$tag" --yes --cleanup-tag
+              done
