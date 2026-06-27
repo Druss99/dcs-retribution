@@ -9,6 +9,9 @@ on:
         default: 'dev'
         type: string
 
+concurrency:
+  group: beta-${{ github.run_id }}
+
 jobs:
   lint:
     uses: ./.github/workflows/lint.yml
@@ -18,6 +21,8 @@ jobs:
   build:
     needs: [lint, test]
     runs-on: windows-latest
+    permissions:
+      contents: write
     steps:
       - uses: actions/checkout@v4
         with:
@@ -41,7 +46,6 @@ jobs:
           $micro = [regex]::Match($content, 'MICRO_VERSION\s*=\s*(\d+)').Groups[1].Value
           $base = "${major}.${minor}.${micro}"
 
-          # Find highest existing rcN tag for this version
           $existing = git tag -l "v${base}-rc*" | ForEach-Object {
             if ($_ -match 'rc(\d+)$') { [int]$Matches[1] } else { 0 }
           } | Sort-Object -Descending | Select-Object -First 1
@@ -50,13 +54,12 @@ jobs:
 
           $tag = "v${base}-rc${next}"
           Write-Output "tag=$tag" >> $env:GITHUB_OUTPUT
-          Write-Output "version=$base" >> $env:GITHUB_OUTPUT
-          Write-Output "rc=$next" >> $env:GITHUB_OUTPUT
 
       - name: Set build number
+        shell: bash
         run: |
-          [IO.File]::WriteAllLines($pwd.path + "\resources\buildnumber", $env:GITHUB_RUN_NUMBER)
-          [IO.File]::WriteAllLines($pwd.path + "\resources\gitsha", $env:GITHUB_SHA)
+          echo $(git rev-list --count HEAD) > resources/buildnumber
+          echo ${GITHUB_SHA:0:7} > resources/gitsha
 
       - name: Build app
         uses: ./.github/actions/build-app
@@ -69,8 +72,16 @@ jobs:
         shell: pwsh
         run: |
           $changelog = Get-Content .\changelog.md
-          $last_change = ($changelog | Select-String -Pattern "^#\s" | Select-Object -Skip 1 -First 1).LineNumber - 2
-          ($changelog | Select-Object -First $last_change) -join "`n" | Out-File .\releasenotes.md
+          $headers = $changelog | Select-String -Pattern "^#\s"
+          if ($headers.Count -lt 2) {
+            "No changelog entries found." | Out-File .\releasenotes.md
+          } else {
+            $last_change = $headers[1].LineNumber - 2
+            ($changelog | Select-Object -First $last_change) -join "`n" | Out-File .\releasenotes.md
+          }
+          if ((Get-Item .\releasenotes.md).Length -eq 0) {
+            "Release candidate build from ${{ inputs.branch }}" | Out-File .\releasenotes.md
+          }
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2

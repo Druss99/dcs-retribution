@@ -5,6 +5,10 @@ on:
     branches-ignore: [dev]
   pull_request:
 
+concurrency:
+  group: build-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   lint:
     uses: ./.github/workflows/lint.yml
@@ -17,6 +21,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           submodules: true
+          fetch-depth: 0
 
       - name: Set up Python environment
         uses: ./.github/actions/setup-liberation-python
@@ -25,9 +30,10 @@ jobs:
         uses: ./.github/actions/setup-liberation-js
 
       - name: Set build number
+        shell: bash
         run: |
-          [IO.File]::WriteAllLines($pwd.path + "\resources\buildnumber", $env:GITHUB_RUN_NUMBER)
-          [IO.File]::WriteAllLines($pwd.path + "\resources\gitsha", $env:GITHUB_SHA)
+          echo $(git rev-list --count HEAD) > resources/buildnumber
+          echo ${GITHUB_SHA:0:7} > resources/gitsha
 
       - name: Build app
         uses: ./.github/actions/build-app
