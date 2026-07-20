@@ -1,84 +1,133 @@
-name: Release Pipeline
+name: Release
 
 on:
   push:
-    tags: ["*"]
+    tags: ["v*"]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Version tag to release (e.g. v1.6.0). Created automatically if it does not exist.'
+        required: true
+        type: string
+      branch:
+        description: 'Branch/ref to release from (only used when the tag does not already exist)'
+        required: true
+        default: 'dev'
+        type: string
+
+# Keyed on the tag itself (not run id) so a workflow_dispatch run and the push event fired
+# by its own tag creation (see "Check if release already exists" below) queue against each
+# other rather than racing to publish the same release twice.
+concurrency:
+  group: release-${{ inputs.tag || github.ref_name }}
 
 jobs:
+  # Alpha/beta releases are also published via the GitHub API, which creates their tag and
+  # therefore also fires this workflow's `push: tags` trigger. Final release tags never
+  # contain a hyphen (v1.6.0) while alpha/rc tags always do (v1.6.0-alpha.6114, v1.6.0-rc1),
+  # so this guard keeps those from spuriously running a full release build.
   lint:
+    if: github.event_name == 'workflow_dispatch' || !contains(github.ref_name, '-')
     uses: ./.github/workflows/lint.yml
-
   test:
+    if: github.event_name == 'workflow_dispatch' || !contains(github.ref_name, '-')
     uses: ./.github/workflows/test.yml
 
   build:
+    if: github.event_name == 'workflow_dispatch' || !contains(github.ref_name, '-')
+    needs: [lint, test]
     runs-on: windows-latest
+    permissions:
+      contents: write
     steps:
       - uses: actions/checkout@v4
         with:
+          ref: ${{ inputs.branch || github.ref }}
           submodules: true
+          fetch-depth: 0
+
+      - name: Determine version
+        id: version
+        shell: bash
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "number=${{ inputs.tag }}" >> $GITHUB_OUTPUT
+          else
+            echo "number=${GITHUB_REF##*/}" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Check if release already exists
+        id: check_release
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          if gh release view "${{ steps.version.outputs.number }}" --repo "${{ github.repository }}" >/dev/null 2>&1; then
+            echo "exists=true" >> $GITHUB_OUTPUT
+          else
+            echo "exists=false" >> $GITHUB_OUTPUT
+          fi
 
       - name: Set up Python environment
+        if: steps.check_release.outputs.exists == 'false'
         uses: ./.github/actions/setup-liberation-python
 
       - name: Set up JS environment
+        if: steps.check_release.outputs.exists == 'false'
         uses: ./.github/actions/setup-liberation-js
 
       - name: Finalize build
+        if: steps.check_release.outputs.exists == 'false'
+        shell: bash
         run: |
-          New-Item -ItemType file resources\final
+          touch resources/final
+          echo $(git rev-list --count HEAD) > resources/buildnumber
+          echo ${GITHUB_SHA:0:7} > resources/gitsha
 
       - name: Build app
+        if: steps.check_release.outputs.exists == 'false'
         uses: ./.github/actions/build-app
         with:
           release: true
 
-      - uses: actions/upload-artifact@v4
-        with:
-          name: dcs-retribution
-          path: dist/
-
-  release:
-    needs: [build]
-    runs-on: windows-latest
-    steps:
-      - uses: actions/download-artifact@v4
-        with:
-          name: dcs-retribution
-
-      - name: "Get Version"
-        id: version
-        env:
-          TAG_NAME: ${{ github.ref }}
+      - name: Create archive and release notes
+        if: steps.check_release.outputs.exists == 'false'
+        shell: pwsh
         run: |
-          Get-ChildItem -Recurse -Depth 1
-          $version = ($env:TAG_NAME -split "/") | Select-Object -Last 1
-          $prerelease = ("2.1.1-alpha3" -match '[^\.\d]').ToString().ToLower()
-          Write-Host $version
-          Write-Host $prerelease
-          Write-Output "::set-output name=number::$version"
-          Write-Output "::set-output name=prerelease::$prerelease"
-          $changelog = Get-Content .\changelog.md
-          $last_change = ($changelog | Select-String -Pattern "^#\s" | Select-Object -Skip 1 -First 1).LineNumber - 2
-          ($changelog | Select-Object -First $last_change) -join "`n" | Out-File .\releasenotes.md
-          Compress-Archive -Path .\dcs-retribution -DestinationPath "dcs-retribution.$version.zip" -Compression Optimal
+          $version = "${{ steps.version.outputs.number }}"
+          Compress-Archive -Path .\dist\dcs-retribution\ -DestinationPath "dist\dcs-retribution.${version}.zip" -CompressionLevel Optimal
 
-      - uses: actions/create-release@v1
-        id: create_release
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          $changelog = Get-Content .\changelog.md
+          $headers = $changelog | Select-String -Pattern "^#\s"
+          if ($headers.Count -lt 2) {
+            "Release v${version}" | Out-File .\releasenotes.md
+          } else {
+            $last_change = $headers[1].LineNumber - 2
+            ($changelog | Select-Object -First $last_change) -join "`n" | Out-File .\releasenotes.md
+          }
+          if ((Get-Item .\releasenotes.md).Length -eq 0) {
+            "Release v${version}" | Out-File .\releasenotes.md
+          }
+
+      - name: Create GitHub Release
+        if: steps.check_release.outputs.exists == 'false'
+        uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ github.ref }}
-          release_name: ${{ github.ref }}
+          tag_name: ${{ steps.version.outputs.number }}
+          target_commitish: ${{ inputs.branch || github.ref }}
+          name: "Retribution ${{ steps.version.outputs.number }}"
           body_path: releasenotes.md
           draft: false
-          prerelease: ${{ steps.version.outputs.prerelease }}
+          prerelease: false
+          files: dist/dcs-retribution.${{ steps.version.outputs.number }}.zip
 
-      - uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Send status to Discord
+        if: steps.check_release.outputs.exists == 'false' && github.repository == 'dcs-retribution/dcs-retribution'
+        uses: stegzilla/discord-notify@v2
         with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./dcs-retribution.${{ steps.version.outputs.number }}.zip
-          asset_name: dcs-retribution.${{ steps.version.outputs.number }}.zip
-          asset_content_type: application/zip
+          webhook_url: ${{ secrets.discord_webhook_releases }}
+          title: "🎉 Retribution ${{ steps.version.outputs.number }} Released!"
+          message: "**Download:** https://github.com/${{ github.repository }}/releases/tag/${{ steps.version.outputs.number }}"
+          include_image: true
+          avatar_url: https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png
+          username: GitHub Build Notifier
